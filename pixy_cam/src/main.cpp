@@ -9,8 +9,6 @@
 #include <string>
 #include <unistd.h>
 
-#include "pixy.h"
-
 #include "DateVersion.h"
 #include "HttpRequestFactory.h"
 #include "PixyCamera.h"
