@@ -51,10 +51,12 @@ namespace pixy_cam
         // quit now if not successful:
         if( return_value < 0 )
         {
+            PixyCameraException ex( return_value );
+
             sendServerErrorResponse(
                 response,
-                "Error taking picture; error code: " + std::to_string( return_value ) +
-                ".  Returned width: " + std::to_string( actualWidth ) + ", height: " + std::to_string( actualHeight ) + ", num pixels: " + std::to_string( numPixels )
+                "Error taking picture: " + std::string( ex.what() ) +
+                "  Returned width: " + std::to_string( actualWidth ) + ", height: " + std::to_string( actualHeight ) + ", num pixels: " + std::to_string( numPixels )
             );
             return;
         }
