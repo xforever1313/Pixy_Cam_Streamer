@@ -71,6 +71,60 @@ namespace pixy_cam
         return returnCode;
     }
 
+    void PixyCamera::SetAutoExposureCompensation( bool enable )
+    {
+        uint8_t value = enable ? 1 : 0;
+        int returnCode = pixy_cam_set_auto_exposure_compensation( value );
+        if( returnCode < 0 )
+        {
+            throw PixyCameraException( returnCode );
+        }
+    }
+    
+    bool PixyCamera::GetAutoExposureCompensation()
+    {
+        int returnCode = pixy_cam_get_auto_exposure_compensation();
+        if( returnCode == 0 )
+        {
+            return false;
+        }
+        else if( returnCode == 1 )
+        {
+            return true;
+        }
+        else
+        {
+            throw PixyCameraException( returnCode );
+        }
+    }
+
+    void PixyCamera::SetAutoWhiteBalance( bool enable )
+    {
+        uint8_t value = enable ? 1 : 0;
+        int returnCode = pixy_cam_set_auto_white_balance( value );
+        if( returnCode < 0 )
+        {
+            throw PixyCameraException( returnCode );
+        }
+    }
+    
+    bool PixyCamera::GetAutoWhiteBalance()
+    {
+        int returnCode = pixy_cam_get_auto_white_balance();
+        if( returnCode == 0 )
+        {
+            return false;
+        }
+        else if( returnCode == 1 )
+        {
+            return true;
+        }
+        else
+        {
+            throw PixyCameraException( returnCode );
+        }
+    }
+
     bool PixyCamera::IsInitialized() const noexcept
     {
         return this->isInitialized;

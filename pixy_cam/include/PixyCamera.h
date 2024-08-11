@@ -19,6 +19,12 @@ namespace pixy_cam
             void SetBrightness( const uint8_t brightness );
             int GetBrightness() const;
 
+            void SetAutoExposureCompensation( bool enable );
+            bool GetAutoExposureCompensation();
+
+            void SetAutoWhiteBalance( bool enable );
+            bool GetAutoWhiteBalance();
+
             bool IsInitialized() const noexcept;
 
             int StopProgram( int32_t* response );

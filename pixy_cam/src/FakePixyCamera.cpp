@@ -26,6 +26,25 @@ namespace pixy_cam
         return "0.0.0";
     }
 
+    void PixyCamera::SetAutoExposureCompensation( bool enable )
+    {
+
+    }
+    
+    bool PixyCamera::GetAutoExposureCompensation()
+    {
+        return true;
+    }
+
+    void PixyCamera::SetAutoWhiteBalance( bool enable )
+    {
+    }
+    
+    bool PixyCamera::GetAutoWhiteBalance()
+    {
+        return true;
+    }
+
     void PixyCamera::SetBrightness( const uint8_t newValue )
     {
     }
