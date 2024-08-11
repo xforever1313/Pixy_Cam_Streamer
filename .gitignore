@@ -3,3 +3,5 @@ obj/
 .sconsign.dblite
 pixy_capture
 
+.vscode/
+.vs/
