@@ -10,6 +10,7 @@ namespace pixy_cam
 {
     BaseHttpRequestHandler::BaseHttpRequestHandler()
     {
+
     }
 
     BaseHttpRequestHandler::~BaseHttpRequestHandler()
