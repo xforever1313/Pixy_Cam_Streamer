@@ -1,4 +1,5 @@
 #include <memory>
+#include <limits>
 #include <Poco/Exception.h>
 #include <Poco/Net/HTMLForm.h>
 #include <Poco/Net/HTTPServerRequest.h>
