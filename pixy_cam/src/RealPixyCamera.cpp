@@ -75,6 +75,13 @@ namespace pixy_cam
         return this->isInitialized;
     }
 
+    int PixyCamera::StopProgram( int32_t* response )
+    {
+        this->ThrowIfNotInitialized();
+
+        return pixy_command( "stop", END_OUT_ARGS, response, END_IN_ARGS );
+    }
+
     int PixyCamera::GetFrame(
         uint8_t mode,
         uint16_t width,

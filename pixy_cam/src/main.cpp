@@ -124,6 +124,14 @@ int main( int argc, char* argv[] )
 
         std::cout << "Camera Version: " << camera.GetVersion() << std::endl;
 
+        int32_t stopResponse;
+        int stopReturn = camera.StopProgram( &stopResponse );
+        if( stopReturn < 0 )
+        {
+            pixy_cam::PixyCameraException ex( stopReturn );
+            std::cout << "STOP returned " << ex.what() << " w/response " << stopResponse << std::endl;
+        }
+
         // Poco is apparently smart enough to delete this automatically.
         Poco::Net::HTTPServerParams* serverParams = new Poco::Net::HTTPServerParams();
         serverParams->setMaxQueued( 100 );

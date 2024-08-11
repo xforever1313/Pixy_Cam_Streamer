@@ -20,6 +20,8 @@ namespace pixy_cam
 
             bool IsInitialized() const noexcept;
 
+            int StopProgram( int32_t* response );
+
             int GetFrame(
                 uint8_t mode,
                 uint16_t width,
