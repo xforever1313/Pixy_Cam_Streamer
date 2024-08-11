@@ -11,6 +11,7 @@
 
 #include "pixy.h"
 
+#include "DateVersion.h"
 #include "HttpRequestFactory.h"
 #include "PixyCamera.h"
 #include "PixyCameraException.h"
@@ -115,6 +116,9 @@ int main( int argc, char* argv[] )
 
     try
     {
+        std::cout << "Server Version: " << pixy_cam::DateVersion::getVersionNumber() << std::endl;
+        std::cout << "Server Built: " << pixy_cam::DateVersion::getBuildTime() << std::endl;
+
         pixy_cam::PixyCamera camera;
         camera.Init();
 

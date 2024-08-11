@@ -5,6 +5,9 @@ import os
 
 baseDir = os.path.abspath( "." )
 
+version = "1.0.0"
+
+defines = ["VERSION=" + '"\\"' + version + '\\""']
 compileFlags = ["-Wall", "-Wextra", "-std=c++17", "-O2", "-Wno-unused-parameter"]
 includePaths = ["include", "/usr/include/libusb-1.0"]
 libs = [
@@ -25,6 +28,7 @@ fakeExe = os.path.join( baseDir, "bin", "fake_pixy_cam" )
 
 env = Environment(
     tools= ["default", "gcc", "g++"],
+    CPPDEFINES=defines,
     CPPPATH = includePaths,
     CXXFLAGS = compileFlags,
     LIBS = libs,
@@ -36,9 +40,9 @@ realEnv = env.Clone(
 )
 
 fakeEnv = env.Clone(
-    CPPDEFINES = ["FAKE_CAMERA"],
     OBJPREFIX = os.path.join( baseDir, "obj", "fake" ) + "/",
 )
+fakeEnv.Append( CPPDEFINES = ["FAKE_CAMERA"] )
 
 exeTarget = realEnv.Program( target=exe, source=sourceFiles )
 Clean( exeTarget, [os.path.join(realEnv['BINDIR']), os.path.join(realEnv['OBJPREFIX'])])
