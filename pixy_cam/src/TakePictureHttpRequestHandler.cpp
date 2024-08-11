@@ -12,6 +12,7 @@ namespace pixy_cam
 {
     TakePictureHttpRequestHandler::TakePictureHttpRequestHandler()
     {
+        // TODO: Should probably make static so we don't have a billion heap allocations.pixy
         this->buffer = new unsigned char[78000];
     }
 
