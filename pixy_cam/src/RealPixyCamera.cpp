@@ -1,6 +1,7 @@
 #ifndef FAKE_CAMERA // <- This is defined if we're on a system that won't have a Pixy Camera connected.
 #include <string>
 #include <mutex>
+#include <vector>
 
 #include "pixy.h"
 #include "PixyCamera.h"
@@ -88,17 +89,21 @@ namespace pixy_cam
         uint16_t height,
         uint16_t* outputtedWidth,
         uint16_t* outputtedHeight,
-        unsigned char*& pixels,
-        uint32_t* numPixels
+        std::vector<unsigned char>& pixels
     )
     {
         this->ThrowIfNotInitialized();
 
+        pixels.clear();
+
+        unsigned char *rawPixels;  //returned pointer to video frame buffer
+
         int32_t camResponse = 0;
         int32_t fourcc = 0;
         int8_t renderflags = 0;
+        uint32_t numPixels = 0;
 
-        return pixy_command(
+        int return_value = pixy_command(
             "cam_getFrame", // String id for remote procedure
             0x01, mode,
             0x02, 0,        // xoffset - 2 bytes
@@ -111,10 +116,20 @@ namespace pixy_cam
             &renderflags,
             outputtedWidth,
             outputtedHeight,
-            numPixels,
-            pixels,         // pointer to mem address for returned frame
+            &numPixels,
+            &rawPixels,         // pointer to mem address for returned frame
             0
         );
+
+        if( return_value == 0 )
+        {
+            for( uint32_t i = 0; i < numPixels; ++i )
+            {
+                pixels.push_back( rawPixels[i] );
+            }
+        }
+
+        return return_value;
     }
 
     void PixyCamera::ThrowIfNotInitialized() const

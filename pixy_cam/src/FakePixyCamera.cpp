@@ -7,15 +7,12 @@
 namespace pixy_cam
 {
     PixyCamera::PixyCamera() :
-        isInitialized( false ),
-        buffer( nullptr )
+        isInitialized( false )
     {
-        this->buffer = new unsigned char[4]{ 'a', 'b', 'c', 'd' };
     }
 
     PixyCamera::~PixyCamera()
     {
-        delete[] this->buffer;
         this->isInitialized = false;
     }
 
@@ -55,14 +52,17 @@ namespace pixy_cam
         uint16_t height,
         uint16_t* outputtedWidth,
         uint16_t* outputtedHeight,
-        unsigned char*& pixels,
-        uint32_t* numPixels
+        std::vector<unsigned char>& vec
     )
     {
+        vec.clear();
+        vec.push_back( 'a' );
+        vec.push_back( 'b' );
+        vec.push_back( 'c' );
+        vec.push_back( 'd' );
+
         *outputtedWidth = 2;
         *outputtedHeight = 2;
-        pixels = this->buffer;
-        *numPixels = 4;
 
         return 0;
     }

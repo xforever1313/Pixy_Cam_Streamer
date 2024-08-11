@@ -35,8 +35,7 @@ namespace pixy_cam
 
         uint16_t actualWidth = 0;
         uint16_t actualHeight = 0;
-        unsigned char *pixels = nullptr;  //returned pointer to video frame buffer
-        uint32_t numPixels = 0;
+        std::vector<unsigned char> pixels;  //returned pointer to video frame buffer
 
         int return_value = this->camera.GetFrame(
             0x21, // <- Unsure what this does, but only 0x21 works.
@@ -44,8 +43,7 @@ namespace pixy_cam
             desiredHeight,
             &actualWidth,
             &actualHeight,
-            pixels,
-            &numPixels
+            pixels
         );
 
         // quit now if not successful:
@@ -56,20 +54,18 @@ namespace pixy_cam
             sendServerErrorResponse(
                 response,
                 "Error taking picture: " + std::string( ex.what() ) +
-                "  Returned width: " + std::to_string( actualWidth ) + ", height: " + std::to_string( actualHeight ) + ", num pixels: " + std::to_string( numPixels )
+                "  Returned width: " + std::to_string( actualWidth ) + ", height: " + std::to_string( actualHeight ) + ", num pixels: " + std::to_string( pixels.size() )
             );
             return;
         }
 
-        std::vector<unsigned char> buffer( pixels, pixels + numPixels );
-
         // Taken from https://stackoverflow.com/a/59734450.
         using namespace boost::archive::iterators;
         using It = base64_from_binary<transform_width<std::vector<unsigned char>::const_iterator, 6, 8>>;
-        std::string base64 = std::string( It( buffer.begin() ), It( buffer.end()) );
+        std::string base64 = std::string( It( pixels.begin() ), It( pixels.end()) );
 
         // Add padding.
-        base64 = base64.append( (3 - buffer.size() % 3 ) % 3, '=' );
+        base64 = base64.append( (3 - pixels.size() % 3 ) % 3, '=' );
 
         std::string jsonResponse = 
             std::string( "{" ) + 

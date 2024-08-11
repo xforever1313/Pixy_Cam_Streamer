@@ -2,6 +2,7 @@
 #define PIXY_CAMERA_H_
 
 #include <string>
+#include <vector>
 
 namespace pixy_cam
 {
@@ -28,18 +29,13 @@ namespace pixy_cam
                 uint16_t height,
                 uint16_t* outputtedWidth,
                 uint16_t* outputtedHeight,
-                unsigned char*& pixels,
-                uint32_t* numPixels
+                std::vector<unsigned char>& pixels
             );
 
         private:
             bool isInitialized;
 
             void ThrowIfNotInitialized() const;
-
-            #ifdef FAKE_CAMERA
-            unsigned char* buffer;
-            #endif
     };
 }
 
