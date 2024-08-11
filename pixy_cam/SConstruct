@@ -1,0 +1,38 @@
+import glob
+import SCons.Defaults
+import SCons
+import os
+
+baseDir = os.path.abspath( "." )
+
+compileFlags = ["-Wall", "-Wextra", "-std=c++17", "-O2"]
+includePaths = ["include", "/usr/include/libusb-1.0"]
+libs = [
+    "pixyusb",
+    "boost_thread",
+    "boost_chrono",
+    "boost_system",
+    "usb-1.0",
+    "PocoNet",
+    "PocoFoundation",
+    "PocoUtil",
+    "pthread"
+]
+sourceFiles = glob.glob( os.path.join( "src", "*.cpp" ) )
+
+exe = os.path.join( baseDir, "bin", "pixy_cam" )
+
+env = Environment(
+    tools= ["default", "gcc", "g++"],
+    CPPPATH = includePaths,
+    CXXFLAGS = compileFlags,
+    OBJPREFIX = os.path.join( baseDir, "obj" ) + "/",
+    LIBS = libs,
+    BINDIR = os.path.join( baseDir, "bin" )
+)
+
+exeTarget = env.Program( target=exe, source=sourceFiles )
+Clean( exeTarget, [os.path.join(env['BINDIR']), os.path.join(env['OBJPREFIX'])])
+
+Alias( "build", exeTarget )
+Default( "build" )

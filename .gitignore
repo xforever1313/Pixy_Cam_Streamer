@@ -1,4 +1,5 @@
-*.bin
-*.out
+bin/
+obj/
+.sconsign.dblite
 pixy_capture
 

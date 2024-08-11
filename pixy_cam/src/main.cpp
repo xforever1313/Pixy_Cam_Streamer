@@ -4,7 +4,6 @@
 #include <csignal>
 #include <fstream>
 #include <iostream>
-#include <jpeglib.h>
 #include <string>
 #include <unistd.h>
 #include "pixy.h"
