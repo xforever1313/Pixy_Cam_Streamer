@@ -1,25 +1,28 @@
 #include <mutex>
+#include <boost/archive/iterators/binary_from_base64.hpp>
+#include <boost/archive/iterators/base64_from_binary.hpp>
+#include <boost/archive/iterators/transform_width.hpp>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPServerRequest.h>
 #include <Poco/Net/HTTPServerResponse.h>
 #include <Poco/Net/HTTPRequestHandler.h>
 #include <string>
+#include <vector>
 
 #include "pixy.h"
+#include "PixyCamera.h"
+#include "PixyCameraException.h"
 #include "TakePictureHttpRequestHandler.h"
 
 namespace pixy_cam
 {
-    TakePictureHttpRequestHandler::TakePictureHttpRequestHandler()
+    TakePictureHttpRequestHandler::TakePictureHttpRequestHandler( PixyCamera& camera ) :
+        camera( camera )
     {
-        // TODO: Should probably make static so we don't have a billion heap allocations.pixy
-        this->buffer = new unsigned char[78000];
     }
 
     TakePictureHttpRequestHandler::~TakePictureHttpRequestHandler()
     {
-        delete[] this->buffer;
-        this->buffer = nullptr;
     }
 
     void TakePictureHttpRequestHandler::handleGetRequest(
@@ -27,41 +30,22 @@ namespace pixy_cam
         Poco::Net::HTTPServerResponse &response
     )
     {
-        sendBadRequestResponse( response, "GET request not valid for this method." );
-    }
+        const uint16_t desiredWidth = 320;
+        const uint16_t desiredHeight = 200;
 
-    void TakePictureHttpRequestHandler::handlePostRequest(
-        Poco::Net::HTTPServerRequest &request,
-        Poco::Net::HTTPServerResponse &response
-    )
-    {
-        // Only allow one resource in at the camera at a time.
-        std::lock_guard<std::mutex>( this->camLock );
+        uint16_t actualWidth = 0;
+        uint16_t actualHeight = 0;
+        unsigned char *pixels = nullptr;  //returned pointer to video frame buffer
+        uint32_t numPixels = 0;
 
-        unsigned char *pixels;  //returned pointer to video frame buffer
-        int32_t camResponse, fourcc;
-        int8_t renderflags;
-        int return_value, res;
-        uint16_t width, height;
-        uint32_t  numPixels;
-
-        camResponse = 0;
-        return_value = pixy_command(
-            "cam_getFrame",  // String id for remote procedure
-            0x01, 0x21,      // mode 0 = 1280x800 25 fps.  1 byte
-            0x02,   0,       // xoffset - 2 bytes
-            0x02,   0,       // yoffset - 2 bytes
-            0x02, 320,       // width   - 2 bytes
-            0x02, 200,       // height  - 2 bytes
-            0,               // separator
-            &camResponse,    // pointer to mem address for return value
-            &fourcc,         //contrary to docs, the next 5 args are needed
-            &renderflags,
-            &width,
-            &height,
-            &numPixels,
-            &pixels,        // pointer to mem address for returned frame
-            0
+        int return_value = this->camera.GetFrame(
+            0x21, // <- Unsure what this does, but only 0x21 works.
+            desiredWidth,
+            desiredHeight,
+            &actualWidth,
+            &actualHeight,
+            pixels,
+            &numPixels
         );
 
         // quit now if not successful:
@@ -70,11 +54,36 @@ namespace pixy_cam
             sendServerErrorResponse(
                 response,
                 "Error taking picture; error code: " + std::to_string( return_value ) +
-                ".  Returned width: " + std::to_string( width ) + ", height: " + std::to_string( height ) + ", num pixels: " + std::to_string( numPixels )
+                ".  Returned width: " + std::to_string( actualWidth ) + ", height: " + std::to_string( actualHeight ) + ", num pixels: " + std::to_string( numPixels )
             );
             return;
         }
 
-        sendSuccessResponse( response, "TODO: Create Base64 here" );
+        std::vector<unsigned char> buffer( pixels, pixels + numPixels );
+
+        // Taken from https://stackoverflow.com/a/59734450.
+        using namespace boost::archive::iterators;
+        using It = base64_from_binary<transform_width<std::vector<unsigned char>::const_iterator, 6, 8>>;
+        std::string base64 = std::string( It( buffer.begin() ), It( buffer.end()) );
+
+        // Add padding.
+        base64 = base64.append( (3 - buffer.size() % 3 ) % 3, '=' );
+
+        std::string jsonResponse = 
+            std::string( "{" ) + 
+                "\"base64\": \"" + base64 + "\"," + 
+                "\"width\":" + std::to_string( actualWidth ) + "," +
+                "\"height\":" + std::to_string( actualHeight ) + "" +
+            "}";
+
+        sendSuccessResponseAsJson( response, jsonResponse );
+    }
+
+    void TakePictureHttpRequestHandler::handlePostRequest(
+        Poco::Net::HTTPServerRequest &request,
+        Poco::Net::HTTPServerResponse &response
+    )
+    {
+        sendBadRequestResponse( response, "POST request not valid for this method." );
     }
 }

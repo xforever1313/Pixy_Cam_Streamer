@@ -41,39 +41,45 @@ namespace pixy_cam
         
     }
 
+    void BaseHttpRequestHandler::sendSuccessResponseAsJson(Poco::Net::HTTPServerResponse &response, const std::string &message )
+    {
+        sendResponse( response, Poco::Net::HTTPResponse::HTTP_OK, message, "application/json" );
+    }
+
     void BaseHttpRequestHandler::sendSuccessResponse(Poco::Net::HTTPServerResponse &response, const std::string &message /*= "ACK"*/)
     {
-        sendResponse(response, Poco::Net::HTTPResponse::HTTP_OK, message);
+        sendResponse( response, Poco::Net::HTTPResponse::HTTP_OK, message, "text/plain" );
     }
 
     void BaseHttpRequestHandler::sendNotFoundResponse(Poco::Net::HTTPServerResponse &response, const std::string &message /*= "Not Found"*/)
     {
-        sendResponse(response, Poco::Net::HTTPResponse::HTTP_NOT_FOUND, message);
+        sendResponse( response, Poco::Net::HTTPResponse::HTTP_NOT_FOUND, message, "text/plain" );
     }
 
     void BaseHttpRequestHandler::sendBadRequestResponse(Poco::Net::HTTPServerResponse &response, const std::string &message /*= "Bad Request"*/)
     {
-        sendResponse(response, Poco::Net::HTTPResponse::HTTP_BAD_REQUEST, message);
+        sendResponse( response, Poco::Net::HTTPResponse::HTTP_BAD_REQUEST, message, "text/plain" );
     }
 
     void BaseHttpRequestHandler::sendServerErrorResponse(Poco::Net::HTTPServerResponse &response, const std::string &message /*= "Internal Server Error"*/)
     {
-        sendResponse(response, Poco::Net::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR, message);
+        sendResponse( response, Poco::Net::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR, message, "text/plain" );
     }
 
     void BaseHttpRequestHandler::sendForbiddenResponse(Poco::Net::HTTPServerResponse &response, const std::string &message /*= "Forbidden"*/)
     {
-        sendResponse(response, Poco::Net::HTTPResponse::HTTP_FORBIDDEN, message);
+        sendResponse( response, Poco::Net::HTTPResponse::HTTP_FORBIDDEN, message, "text/plain" );
     }
 
     void BaseHttpRequestHandler::sendResponse(
         Poco::Net::HTTPServerResponse &response,
         Poco::Net::HTTPResponse::HTTPStatus status,
-        const std::string &message
+        const std::string &message,
+        const std::string &contentType
     )
     {
-        response.setContentType("text/html");
-        response.setStatus(status);
+        response.setContentType( contentType );
+        response.setStatus( status );
         std::ostream &ostr = response.send();
         ostr << message;
     }

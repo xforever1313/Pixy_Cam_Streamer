@@ -20,12 +20,24 @@ namespace pixy_cam
 
             bool IsInitialized() const noexcept;
 
-            const std::string GetFrame();
+            int GetFrame(
+                uint8_t mode,
+                uint16_t width,
+                uint16_t height,
+                uint16_t* outputtedWidth,
+                uint16_t* outputtedHeight,
+                unsigned char*& pixels,
+                uint32_t* numPixels
+            );
 
         private:
             bool isInitialized;
 
             void ThrowIfNotInitialized() const;
+
+            #ifdef FAKE_CAMERA
+            unsigned char* buffer;
+            #endif
     };
 }
 

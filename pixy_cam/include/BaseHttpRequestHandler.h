@@ -35,6 +35,11 @@ namespace pixy_cam
             virtual void handleGetRequest(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse &response) = 0;
 
             ///
+            /// \brief Sends back message with status 200 with content type of application/json.
+            ///
+            void sendSuccessResponseAsJson(Poco::Net::HTTPServerResponse &response, const std::string &message);
+
+            ///
             /// \brief Sends back message with status 200.
             ///
             void sendSuccessResponse(Poco::Net::HTTPServerResponse &response, const std::string &message = "ACK");
@@ -60,7 +65,12 @@ namespace pixy_cam
             void sendForbiddenResponse(Poco::Net::HTTPServerResponse &response, const std::string &message = "Forbidden");
 
         private:
-             void sendResponse(Poco::Net::HTTPServerResponse &response, Poco::Net::HTTPResponse::HTTPStatus status, const std::string &message);
+             void sendResponse(
+                Poco::Net::HTTPServerResponse &response,
+                Poco::Net::HTTPResponse::HTTPStatus status,
+                const std::string &message,
+                const std::string &contentType
+            );
     };
 }
 

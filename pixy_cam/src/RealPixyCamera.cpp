@@ -75,6 +75,41 @@ namespace pixy_cam
         return this->isInitialized;
     }
 
+    int PixyCamera::GetFrame(
+        uint8_t mode,
+        uint16_t width,
+        uint16_t height,
+        uint16_t* outputtedWidth,
+        uint16_t* outputtedHeight,
+        unsigned char*& pixels,
+        uint32_t* numPixels
+    )
+    {
+        this->ThrowIfNotInitialized();
+
+        int32_t camResponse = 0;
+        int32_t fourcc = 0;
+        int8_t renderflags = 0;
+
+        return pixy_command(
+            "cam_getFrame", // String id for remote procedure
+            0x01, mode,
+            0x02, 0,        // xoffset - 2 bytes
+            0x02, 0,        // yoffset - 2 bytes
+            0x02, width,    // width - 2 bytes
+            0x02, height,   // height - 2 bytes,
+            0,              // separator
+            &camResponse,    // pointer to mem address for return value
+            &fourcc,        // contrary to docs, the next 5 args are needed
+            &renderflags,
+            outputtedWidth,
+            outputtedHeight,
+            numPixels,
+            pixels,         // pointer to mem address for returned frame
+            0
+        );
+    }
+
     void PixyCamera::ThrowIfNotInitialized() const
     {
         if( this->isInitialized == false )

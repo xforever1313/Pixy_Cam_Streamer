@@ -28,6 +28,10 @@ namespace pixy_cam
         {
             return new SetBrightnessHttpRequestHandler( this->camera );
         }
+        else if( "/capture" == request.getURI() )
+        {
+            return new TakePictureHttpRequestHandler( this->camera );
+        }
         else
         {
             return new NotFoundHttpRequestHandler();

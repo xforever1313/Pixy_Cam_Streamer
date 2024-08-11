@@ -8,13 +8,14 @@
 #include <string>
 
 #include "BaseHttpRequestHandler.h"
+#include "PixyCamera.h"
 
 namespace pixy_cam
 {
     class TakePictureHttpRequestHandler : public pixy_cam::BaseHttpRequestHandler
     {
         public: 
-            TakePictureHttpRequestHandler();
+            TakePictureHttpRequestHandler( PixyCamera& camera );
             ~TakePictureHttpRequestHandler();
 
             void handlePostRequest(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse &response) override;
@@ -22,8 +23,7 @@ namespace pixy_cam
             void handleGetRequest(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse &response) override;
 
         private:
-            unsigned char* buffer;
-            std::mutex camLock;
+            PixyCamera& camera;
     };
 }
 
