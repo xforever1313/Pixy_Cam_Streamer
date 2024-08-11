@@ -7,13 +7,14 @@
 #include <string>
 
 #include "pixy.h"
+#include "PixyCamera.h"
 #include "SetBrightnessHttpRequestHandler.h"
 
 namespace pixy_cam
 {
-    SetBrightnessHttpRequestHandler::SetBrightnessHttpRequestHandler()
+    SetBrightnessHttpRequestHandler::SetBrightnessHttpRequestHandler( PixyCamera& camera ) :
+        camera( camera )
     {
-
     }
 
     SetBrightnessHttpRequestHandler::~SetBrightnessHttpRequestHandler()
@@ -25,12 +26,7 @@ namespace pixy_cam
         Poco::Net::HTTPServerResponse &response
     )
     {
-        int brightness = pixy_cam_get_brightness();
-        if( brightness < 0 )
-        {
-            sendServerErrorResponse( response, "Could not get brightness, got error message " + std::to_string( brightness ) );
-        }
-
+        int brightness = this->camera.GetBrightness();
         sendSuccessResponse( response, std::to_string( brightness ) );
     }
 
@@ -53,17 +49,11 @@ namespace pixy_cam
 
             uint8_t brightness = static_cast<uint8_t>( value );
 
-            int error = pixy_cam_set_brightness( brightness );
-            if( error < 0 )
-            {
-                sendServerErrorResponse( response, "Could not set brightness, got error " + std::to_string( error ) );
-            }
-            else
-            {
-                sendSuccessResponse( response );
-            }
+            this->camera.SetBrightness( brightness );
+
+            sendSuccessResponse( response );
         }
-        catch(const Poco::NotFoundException &e)
+        catch( const Poco::NotFoundException &e )
         {
             sendBadRequestResponse( response, "Missing Field" );
         }

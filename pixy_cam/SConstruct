@@ -5,7 +5,7 @@ import os
 
 baseDir = os.path.abspath( "." )
 
-compileFlags = ["-Wall", "-Wextra", "-std=c++17", "-O2"]
+compileFlags = ["-Wall", "-Wextra", "-std=c++17", "-O2", "-Wno-unused-parameter"]
 includePaths = ["include", "/usr/include/libusb-1.0"]
 libs = [
     "pixyusb",
@@ -21,18 +21,31 @@ libs = [
 sourceFiles = glob.glob( os.path.join( "src", "*.cpp" ) )
 
 exe = os.path.join( baseDir, "bin", "pixy_cam" )
+fakeExe = os.path.join( baseDir, "bin", "fake_pixy_cam" )
 
 env = Environment(
     tools= ["default", "gcc", "g++"],
     CPPPATH = includePaths,
     CXXFLAGS = compileFlags,
-    OBJPREFIX = os.path.join( baseDir, "obj" ) + "/",
     LIBS = libs,
     BINDIR = os.path.join( baseDir, "bin" )
 )
 
-exeTarget = env.Program( target=exe, source=sourceFiles )
-Clean( exeTarget, [os.path.join(env['BINDIR']), os.path.join(env['OBJPREFIX'])])
+realEnv = env.Clone(
+    OBJPREFIX = os.path.join( baseDir, "obj", "real" ) + "/",
+)
+
+fakeEnv = env.Clone(
+    CPPDEFINES = ["FAKE_CAMERA"],
+    OBJPREFIX = os.path.join( baseDir, "obj", "fake" ) + "/",
+)
+
+exeTarget = realEnv.Program( target=exe, source=sourceFiles )
+Clean( exeTarget, [os.path.join(realEnv['BINDIR']), os.path.join(realEnv['OBJPREFIX'])])
+
+fakeTarget = fakeEnv.Program( target=fakeExe, source=sourceFiles )
+Clean( fakeTarget, [os.path.join(fakeEnv['BINDIR']), os.path.join(fakeEnv['OBJPREFIX'])])
 
 Alias( "build", exeTarget )
+Alias( "build_fake", fakeTarget )
 Default( "build" )

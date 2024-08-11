@@ -5,6 +5,7 @@
 #include <Poco/Net/HTTPServerResponse.h>
 #include <string>
 
+#include "PixyCamera.h"
 #include "BaseHttpRequestHandler.h"
 
 namespace pixy_cam
@@ -12,12 +13,15 @@ namespace pixy_cam
     class SetBrightnessHttpRequestHandler : public pixy_cam::BaseHttpRequestHandler
     {
         public: 
-            SetBrightnessHttpRequestHandler();
+            SetBrightnessHttpRequestHandler( PixyCamera& camera );
             ~SetBrightnessHttpRequestHandler();
 
-        void handlePostRequest(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse &response) override;
+            void handlePostRequest(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse &response) override;
 
-        void handleGetRequest(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse &response) override;
+            void handleGetRequest(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse &response) override;
+
+        private:
+            PixyCamera& camera;
     };
 }
 

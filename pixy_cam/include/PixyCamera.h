@@ -13,7 +13,7 @@ namespace pixy_cam
 
             void Init();
 
-            const std::string GetVersion() const;
+            const std::string GetVersion();
 
             void SetBrightness( const uint8_t brightness );
             int GetBrightness() const;

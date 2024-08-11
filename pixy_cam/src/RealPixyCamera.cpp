@@ -30,8 +30,10 @@ namespace pixy_cam
         this->isInitialized = true;
     }
 
-    const std::string GetVersion()
+    const std::string PixyCamera::GetVersion()
     {
+        this->ThrowIfNotInitialized();
+
         uint16_t major;
         uint16_t minor;
         uint16_t build;
@@ -46,6 +48,8 @@ namespace pixy_cam
 
     void PixyCamera::SetBrightness( const uint8_t newValue )
     {
+        this->ThrowIfNotInitialized();
+
         int returnCode = pixy_cam_set_brightness( newValue );
         if( returnCode < 0 )
         {
@@ -55,6 +59,8 @@ namespace pixy_cam
 
     int PixyCamera::GetBrightness() const
     {
+        this->ThrowIfNotInitialized();
+
         int returnCode  = pixy_cam_get_brightness();
         if( returnCode < 0 )
         {
