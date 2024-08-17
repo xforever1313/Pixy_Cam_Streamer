@@ -9,7 +9,15 @@
 #include <string>
 #include <unistd.h>
 
+extern "C" {
+#include <libavformat/avformat.h>
+#include <libavcodec/avcodec.h>
+#include <libavutil/imgutils.h>
+}
+
 #include "DateVersion.h"
+#include "FfmpegException.h"
+#include "FfmpegRunner.h"
 #include "HttpRequestFactory.h"
 #include "PixyCamera.h"
 #include "PixyCameraException.h"
@@ -28,7 +36,10 @@ int main( int argc, char* argv[] )
     signal( SIGINT, handle_signal );
     signal( SIGTERM, handle_signal );
 
+    const uint16_t desiredWidth = 320;
+    const uint16_t desiredHeight = 200;
     uint16_t port = 10013;
+
     if( argc >= 2 )
     {
         unsigned long value = std::stoul( argv[1] );
@@ -44,7 +55,7 @@ int main( int argc, char* argv[] )
         std::cout << "Server Version: " << pixy_cam::DateVersion::getVersionNumber() << std::endl;
         std::cout << "Server Built: " << pixy_cam::DateVersion::getBuildTime() << std::endl;
 
-        pixy_cam::PixyCamera camera;
+        pixy_cam::PixyCamera camera( desiredWidth, desiredHeight );
         camera.Init();
 
         std::cout << "Camera Version: " << camera.GetVersion() << std::endl;
@@ -69,6 +80,9 @@ int main( int argc, char* argv[] )
         Poco::Net::HTTPServer server( new pixy_cam::HttpRequestFactory( camera ), socket, serverParams );
         server.start();
 
+        pixy_cam::FfmpegRunner ffmpeg( camera );
+        ffmpeg.StartLoop();
+
         std::mutex m;
         std::unique_lock lock(m);
         terminateEvent.wait( lock );
@@ -81,6 +95,11 @@ int main( int argc, char* argv[] )
     {
         std::cout << e.what() << std::endl;
         return e.GetErrorCode();
+    }
+    catch( const pixy_cam::FfmpegException& e )
+    {
+        std::cout << e.what() << std::endl;
+        return 50;
     }
     catch( const std::exception& e )
     {

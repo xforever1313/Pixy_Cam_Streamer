@@ -30,17 +30,12 @@ namespace pixy_cam
         Poco::Net::HTTPServerResponse &response
     )
     {
-        const uint16_t desiredWidth = 320;
-        const uint16_t desiredHeight = 200;
-
         uint16_t actualWidth = 0;
         uint16_t actualHeight = 0;
         std::vector<unsigned char> pixels;  //returned pointer to video frame buffer
 
         int return_value = this->camera.GetFrame(
             0x21, // <- Unsure what this does, but only 0x21 works.
-            desiredWidth,
-            desiredHeight,
             &actualWidth,
             &actualHeight,
             pixels

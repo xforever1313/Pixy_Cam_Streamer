@@ -8,9 +8,11 @@ baseDir = os.path.abspath( "." )
 version = "1.0.0"
 
 defines = ["VERSION=" + '"\\"' + version + '\\""']
-compileFlags = ["-Wall", "-Wextra", "-std=c++17", "-O2", "-Wno-unused-parameter"]
-includePaths = ["include", "/usr/include/libusb-1.0"]
+compileFlags = ["-Wall", "-Wextra", "-std=c++17", "-Wno-unused-parameter"]
+includePaths = ["include", "/usr/include/libusb-1.0", "/usr/include/x86_64-linux-gnu"]
 libs = [
+    "avcodec",
+    "avformat",
     "pixyusb",
     "boost_thread",
     "boost_chrono",
@@ -38,11 +40,17 @@ env = Environment(
 realEnv = env.Clone(
     OBJPREFIX = os.path.join( baseDir, "obj", "real" ) + "/",
 )
+realEnv.Append( 
+    CXXFLAGS=["-O2"]
+)
 
 fakeEnv = env.Clone(
     OBJPREFIX = os.path.join( baseDir, "obj", "fake" ) + "/",
 )
-fakeEnv.Append( CPPDEFINES = ["FAKE_CAMERA"] )
+fakeEnv.Append(
+    CPPDEFINES = ["FAKE_CAMERA"],
+    CXXFLAGS = ["-g", "-O0"]
+)
 
 exeTarget = realEnv.Program( target=exe, source=sourceFiles )
 Clean( exeTarget, [os.path.join(realEnv['BINDIR']), os.path.join(realEnv['OBJPREFIX'])])

@@ -6,8 +6,10 @@
 
 namespace pixy_cam
 {
-    PixyCamera::PixyCamera() :
-        isInitialized( false )
+    PixyCamera::PixyCamera( uint16_t frameWidth, uint16_t frameHeight ) :
+        isInitialized( false ),
+        frameWidth( frameWidth ),
+        frameHeight( frameHeight )
     {
     }
 
@@ -67,8 +69,6 @@ namespace pixy_cam
 
     int PixyCamera::GetFrame(
         uint8_t mode,
-        uint16_t width,
-        uint16_t height,
         uint16_t* outputtedWidth,
         uint16_t* outputtedHeight,
         std::vector<unsigned char>& vec

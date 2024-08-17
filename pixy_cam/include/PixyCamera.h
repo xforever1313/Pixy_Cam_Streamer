@@ -9,7 +9,7 @@ namespace pixy_cam
     class PixyCamera
     {
         public:
-            PixyCamera();
+            PixyCamera( uint16_t frameWidth, uint16_t frameHeight );
             ~PixyCamera();
 
             void Init();
@@ -26,20 +26,30 @@ namespace pixy_cam
             bool GetAutoWhiteBalance();
 
             bool IsInitialized() const noexcept;
+            inline uint16_t GetWidth() const noexcept
+            {
+                return this->frameWidth;
+            }
+            inline uint16_t GetHeight() const noexcept
+            {
+                return this->frameHeight;
+            }
 
             int StopProgram( int32_t* response );
 
             int GetFrame(
                 uint8_t mode,
-                uint16_t width,
-                uint16_t height,
                 uint16_t* outputtedWidth,
                 uint16_t* outputtedHeight,
                 std::vector<unsigned char>& pixels
             );
 
         private:
+            PixyCamera() = delete;
+
             bool isInitialized;
+            const uint16_t frameWidth;
+            const uint16_t frameHeight;
 
             void ThrowIfNotInitialized() const;
     };

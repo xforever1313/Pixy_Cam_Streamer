@@ -9,8 +9,10 @@
 
 namespace pixy_cam
 {
-    PixyCamera::PixyCamera() :
-        isInitialized( false )
+    PixyCamera::PixyCamera( uint16_t frameWidth, uint16_t frameHeight ) :
+        isInitialized( false ),
+        frameWidth( frameWidth ),
+        frameHeight( frameHeight )
     {
     }
 
@@ -139,8 +141,6 @@ namespace pixy_cam
 
     int PixyCamera::GetFrame(
         uint8_t mode,
-        uint16_t width,
-        uint16_t height,
         uint16_t* outputtedWidth,
         uint16_t* outputtedHeight,
         std::vector<unsigned char>& pixels
@@ -162,8 +162,8 @@ namespace pixy_cam
             0x01, mode,
             0x02, 0,        // xoffset - 2 bytes
             0x02, 0,        // yoffset - 2 bytes
-            0x02, width,    // width - 2 bytes
-            0x02, height,   // height - 2 bytes,
+            0x02, this->frameWidth,    // width - 2 bytes
+            0x02, this->frameHeight,   // height - 2 bytes,
             0,              // separator
             &camResponse,    // pointer to mem address for return value
             &fourcc,        // contrary to docs, the next 5 args are needed
@@ -190,7 +190,7 @@ namespace pixy_cam
     {
         if( this->isInitialized == false )
         {
-            throw new std::runtime_error( "Pixy Cam not initialized, please call Init()." );
+            throw std::runtime_error( "Pixy Cam not initialized, please call Init()." );
         }
     }
 }
