@@ -204,7 +204,7 @@ namespace pixy_cam
         );
         if( !this->swsContext )
         {
-            throw FfmpegException( "Could not initialized sws context." );
+            throw FfmpegException( "Could not initialize sws context." );
         }
     }
 
@@ -215,7 +215,13 @@ namespace pixy_cam
         {
             throw FfmpegException( "Can not find H264 codec." );
         }
-        avformat_alloc_output_context2( &this->outputFormatContext, nullptr, "rtp", this->url.c_str() );
+        int returnCode = avformat_alloc_output_context2( &this->outputFormatContext, nullptr, "rtp", this->url.c_str() );
+        if( returnCode < 0 )
+        {
+            std::cerr << "Error allocating output format context" << std::endl;
+            throw FfmpegException( returnCode );
+        }
+
         this->outputStream = avformat_new_stream( this->outputFormatContext, codec );
         if( !this->outputStream )
         {
@@ -234,11 +240,15 @@ namespace pixy_cam
         this->outputCodecContext->height = this->camera.GetHeight();
         this->outputCodecContext->time_base = (AVRational){1, 25};
         this->outputCodecContext->framerate = (AVRational){25, 1};
+        this->outputCodecContext->gop_size = 10;
+        this->outputCodecContext->max_b_frames = 1;
         this->outputCodecContext->pix_fmt = AV_PIX_FMT_YUV420P;
 
-        if( avcodec_open2( this->outputCodecContext, codec, nullptr ) < 0 )
+        returnCode = avcodec_open2( this->outputCodecContext, codec, nullptr );
+        if( returnCode < 0 )
         {
-            throw FfmpegException( "Could not open output codec" );
+            std::cerr << "Could not open output codec" << std::endl;
+            throw FfmpegException( returnCode );
         }
 
         // Setup Frame
@@ -250,9 +260,12 @@ namespace pixy_cam
         this->outputStreamFrame->format = this->outputCodecContext->pix_fmt;
         this->outputStreamFrame->width = this->camera.GetWidth();
         this->outputStreamFrame->height = this->camera.GetHeight();
-        if( av_frame_get_buffer( this->outputStreamFrame, 0 ) < 0 )
+        returnCode = av_frame_get_buffer( this->outputStreamFrame, 0 );
+
+        if( returnCode < 0 )
         {
-            throw FfmpegException( "Could not allocate output stream video frames." );
+            std::cerr << "Could not allocate output stream video frames." << std::endl;
+            throw FfmpegException( returnCode );
         }
     }
 }
