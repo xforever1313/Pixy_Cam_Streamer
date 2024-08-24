@@ -120,13 +120,14 @@ int main( int argc, char* argv[] )
         Poco::Net::HTTPServer server( new pixy_cam::HttpRequestFactory( camera ), socket, serverParams );
         server.start();
 
-        pixy_cam::FfmpegRunner ffmpeg( camera );
+        pixy_cam::FfmpegRunner ffmpeg( camera, url );
         ffmpeg.StartLoop();
 
         std::mutex m;
         std::unique_lock lock(m);
         terminateEvent.wait( lock );
         std::cout<< "SIGNAL received, terminating." << std::endl;
+        ffmpeg.StopLoop();
         server.stop();
 
         return 0;

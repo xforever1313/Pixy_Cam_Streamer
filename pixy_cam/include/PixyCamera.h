@@ -1,6 +1,7 @@
 #ifndef PIXY_CAMERA_H_
 #define PIXY_CAMERA_H_
 
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -41,7 +42,7 @@ namespace pixy_cam
                 uint8_t mode,
                 uint16_t* outputtedWidth,
                 uint16_t* outputtedHeight,
-                std::vector<unsigned char>& pixels
+                std::vector<uint8_t>& pixels
             );
 
         private:
@@ -50,6 +51,7 @@ namespace pixy_cam
             bool isInitialized;
             const uint16_t frameWidth;
             const uint16_t frameHeight;
+            std::mutex takePictureLock;
 
             void ThrowIfNotInitialized() const;
     };

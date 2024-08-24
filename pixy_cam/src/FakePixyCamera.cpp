@@ -9,7 +9,8 @@ namespace pixy_cam
     PixyCamera::PixyCamera( uint16_t frameWidth, uint16_t frameHeight ) :
         isInitialized( false ),
         frameWidth( frameWidth ),
-        frameHeight( frameHeight )
+        frameHeight( frameHeight ),
+        takePictureLock()
     {
     }
 
@@ -71,9 +72,12 @@ namespace pixy_cam
         uint8_t mode,
         uint16_t* outputtedWidth,
         uint16_t* outputtedHeight,
-        std::vector<unsigned char>& vec
+        std::vector<uint8_t>& vec
     )
     {
+        // Only allow one thread in at a time to get a picture.
+        std::lock_guard( this->takePictureLock );
+
         vec.clear();
         vec.push_back( 'a' );
         vec.push_back( 'b' );

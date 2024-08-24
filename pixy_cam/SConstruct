@@ -13,6 +13,8 @@ includePaths = ["include", "/usr/include/libusb-1.0", "/usr/include/x86_64-linux
 libs = [
     "avcodec",
     "avformat",
+    "avutil",
+    "swscale",
     "pixyusb",
     "boost_thread",
     "boost_chrono",
