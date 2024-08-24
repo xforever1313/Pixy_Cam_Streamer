@@ -257,7 +257,7 @@ namespace pixy_cam
         {
             throw FfmpegException( "Can not find H264 codec." );
         }
-        int returnCode = avformat_alloc_output_context2( &this->outputFormatContext, nullptr, "flv", this->url.c_str() );
+        int returnCode = avformat_alloc_output_context2( &this->outputFormatContext, nullptr, "rtp", this->url.c_str() );
         if( returnCode < 0 )
         {
             std::cerr << "Error allocating output format context" << std::endl;
