@@ -136,6 +136,7 @@ namespace pixy_cam
                     rawBytes.end(),
                     this->cameraFrame->data[0]
                 );
+                this->cameraFrame->linesize[0] = this->camera.GetWidth();
 
                 // Convert Bayer to YUV420P
                 sws_scale(
