@@ -31,6 +31,7 @@ namespace pixy_cam
         outputFormatContext( nullptr ),
         outputCodecContext( nullptr ),
         outputStreamFrame( nullptr ),
+        packet( nullptr ),
         fileOpened( false )
     {
         avformat_network_init();
@@ -46,6 +47,12 @@ namespace pixy_cam
             {
                 avio_closep( &this->outputFormatContext->pb );
             }
+        }
+
+        if( this->packet != nullptr )
+        {
+            av_packet_free( &this->packet );
+            this->packet = nullptr;
         }
 
         if( this->swsContext != nullptr )
@@ -117,12 +124,13 @@ namespace pixy_cam
 
     void FfmpegRunner::ThreadEntry()
     {
-        AVPacket packet;
+        this->packet = av_packet_alloc();
+        this->packet->data = nullptr;
+        this->packet->size = 0;
         try
         {
             CreateInputStream();
             CreateOutputStream();
-            av_init_packet( &packet );
 
             uint16_t actualWidth;
             uint16_t actualHeight;
@@ -179,10 +187,10 @@ namespace pixy_cam
                     std::cerr << "Error sending frame for encoding: " + std::to_string( return_value ) << std::endl;
                     throw FfmpegException( return_value );
                 }
-                while( avcodec_receive_packet( this->outputCodecContext, &packet ) >= 0 )
+                while( avcodec_receive_packet( this->outputCodecContext, packet ) >= 0 )
                 {
-                    av_interleaved_write_frame( this->outputFormatContext, &packet );
-                    av_packet_unref( &packet );
+                    av_interleaved_write_frame( this->outputFormatContext, packet );
+                    av_packet_unref( packet );
                 }
 
             } // End while loop.

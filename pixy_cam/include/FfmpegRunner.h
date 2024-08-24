@@ -48,6 +48,7 @@ namespace pixy_cam
             AVFormatContext* outputFormatContext;
             AVCodecContext* outputCodecContext;
             AVFrame* outputStreamFrame;
+            AVPacket* packet;
             bool fileOpened;
     };
 }
