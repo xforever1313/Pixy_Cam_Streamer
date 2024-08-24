@@ -30,8 +30,48 @@ void handle_signal( int )
     terminateEvent.notify_all();
 }
 
+void PrintUsage( const std::string& exeName )
+{
+    std::cout << "Start Server: " << exeName << " <rtp url> [port]" << std::endl;
+    std::cout << "Print Help: " << exeName << " --help" << std::endl;
+    std::cout << "Print Version: " << exeName << " --version" << std::endl;
+}
+
+void PrintVersion()
+{
+    std::cout << "Server Version: " << pixy_cam::DateVersion::getVersionNumber() << std::endl;
+    std::cout << "Server Built: " << pixy_cam::DateVersion::getBuildTime() << std::endl;
+}
+
 int main( int argc, char* argv[] )
 {
+
+    std::string url;
+
+    if( argc <= 1 )
+    {
+        std::cout << "Invalid Arguments.  See below for usage." << std::endl;
+        PrintUsage( argv[0] );
+        return 1;
+    }
+    else if( argc >= 2 )
+    {
+        if( std::string( "--help" ) == argv[1] )
+        {
+            PrintUsage( argv[0] );
+            return 0;
+        }
+        else if( std::string( "--version" ) == argv[1] )
+        {
+            PrintVersion();
+            return 0;
+        }
+        else
+        {
+            url = argv[1];
+        }
+    }
+
     // Catch CTRL+C (SIGINT) signals
     signal( SIGINT, handle_signal );
     signal( SIGTERM, handle_signal );
@@ -39,10 +79,9 @@ int main( int argc, char* argv[] )
     const uint16_t desiredWidth = 320;
     const uint16_t desiredHeight = 200;
     uint16_t port = 10013;
-
-    if( argc >= 2 )
+    if( argc >= 3 )
     {
-        unsigned long value = std::stoul( argv[1] );
+        unsigned long value = std::stoul( argv[2] );
         if( value > std::numeric_limits<uint16_t>::max() )
         {
             std::cout << "Passed in port is too big.  Must be less than " << std::numeric_limits<uint16_t>::max() << std::endl;
@@ -52,8 +91,9 @@ int main( int argc, char* argv[] )
 
     try
     {
-        std::cout << "Server Version: " << pixy_cam::DateVersion::getVersionNumber() << std::endl;
-        std::cout << "Server Built: " << pixy_cam::DateVersion::getBuildTime() << std::endl;
+        PrintVersion();
+        std::cout << "Passed in RTP Server: " << url << std::endl;
+        std::cout << "Passed in HTTP port: " << port << std::endl;
 
         pixy_cam::PixyCamera camera( desiredWidth, desiredHeight );
         camera.Init();
