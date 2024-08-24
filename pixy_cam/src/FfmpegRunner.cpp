@@ -283,14 +283,14 @@ namespace pixy_cam
         avcodec_parameters_to_context(this->outputCodecContext, this->outputStream->codecpar);
 
         // Set codec parameters
-        //this->outputCodecContext->codec_id = AV_CODEC_ID_H264;
-        //this->outputCodecContext->width = this->camera.GetWidth();
-        //this->outputCodecContext->height = this->camera.GetHeight();
-        //this->outputCodecContext->framerate = (AVRational){25, 1};
-        //this->outputCodecContext->gop_size = 10;
-        //this->outputCodecContext->max_b_frames = 1;
-        //this->outputCodecContext->pix_fmt = AV_PIX_FMT_YUV420P;
+        this->outputCodecContext->codec_id = AV_CODEC_ID_H264;
+        this->outputCodecContext->width = this->camera.GetWidth();
+        this->outputCodecContext->height = this->camera.GetHeight();
+        this->outputCodecContext->framerate = (AVRational){25, 1};
         this->outputCodecContext->time_base = (AVRational){1, 25}; // 25fps
+        this->outputCodecContext->gop_size = 10;
+        this->outputCodecContext->max_b_frames = 1;
+        this->outputCodecContext->pix_fmt = AV_PIX_FMT_YUV420P;
 
         returnCode = avcodec_open2( this->outputCodecContext, codec, nullptr );
         if( returnCode < 0 )
