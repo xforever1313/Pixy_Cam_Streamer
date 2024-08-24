@@ -95,7 +95,7 @@ namespace pixy_cam
 
     void FfmpegRunner::StopLoop()
     {
-        std::lock_guard( this->startStopLock );
+        std::lock_guard<std::mutex>( this->startStopLock );
         if( this->isRunning == false )
         {
             return;
@@ -168,7 +168,7 @@ namespace pixy_cam
 
     void FfmpegRunner::CreateInputStream()
     {
-        AVCodec* codec  = avcodec_find_decoder( AV_CODEC_ID_RAWVIDEO );
+        const AVCodec* codec  = avcodec_find_decoder( AV_CODEC_ID_RAWVIDEO );
         if( !codec )
         {
             throw FfmpegException( "Can not find raw video codec." );
@@ -208,7 +208,7 @@ namespace pixy_cam
 
     void FfmpegRunner::CreateOutputStream()
     {
-        AVCodec* codec = avcodec_find_decoder( AV_CODEC_ID_H264 );
+        const AVCodec* codec = avcodec_find_decoder( AV_CODEC_ID_H264 );
         if( !codec )
         {
             throw FfmpegException( "Can not find H264 codec." );
