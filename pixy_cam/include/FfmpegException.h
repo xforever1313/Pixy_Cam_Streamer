@@ -8,8 +8,12 @@ namespace pixy_cam
     class FfmpegException : public std::runtime_error
     {
         public:
+            FfmpegException( int errorCode );
             FfmpegException( const std::string& message );
             ~FfmpegException();
+
+        private:
+            static std::string GetErrorCodeMessage( int errorCode );
     };
 }
 

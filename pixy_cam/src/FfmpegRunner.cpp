@@ -156,7 +156,8 @@ namespace pixy_cam
                 );
                 if( return_value < 0 )
                 {
-                    throw FfmpegException( "Error sending frame for encoding: " + std::to_string( return_value ) );
+                    std::cerr << "Error sending frame for encoding: " + std::to_string( return_value ) << std::endl;
+                    throw FfmpegException( return_value );
                 }
             }
         }
