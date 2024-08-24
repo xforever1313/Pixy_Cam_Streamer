@@ -30,7 +30,8 @@ namespace pixy_cam
         outputStream( nullptr ),
         outputFormatContext( nullptr ),
         outputCodecContext( nullptr ),
-        outputStreamFrame( nullptr )
+        outputStreamFrame( nullptr ),
+        fileOpened( false )
     {
         avformat_network_init();
     }
@@ -38,6 +39,14 @@ namespace pixy_cam
     FfmpegRunner::~FfmpegRunner()
     {
         StopLoop();
+
+        if( !( this->outputFormatContext->oformat->flags & AVFMT_NOFILE ) )
+        {
+            if( this->fileOpened )
+            {
+                avio_closep( &this->outputFormatContext->pb );
+            }
+        }
 
         if( this->swsContext != nullptr )
         {
@@ -108,17 +117,28 @@ namespace pixy_cam
 
     void FfmpegRunner::ThreadEntry()
     {
+        AVPacket packet;
         try
         {
             CreateInputStream();
             CreateOutputStream();
+            av_init_packet( &packet );
 
             uint16_t actualWidth;
             uint16_t actualHeight;
             std::vector<uint8_t> rawBytes;
+            
+            // Write header packet
+            int return_value = avformat_write_header( this->outputFormatContext, nullptr );
+            if( return_value < 0 )
+            {
+                std::cerr << "Could not write header" << std::endl;
+                throw FfmpegException( return_value );
+            }
+
             while( this->keepRunning )
             {
-                int return_value = this->camera.GetFrame(
+                return_value = this->camera.GetFrame(
                     0x21, // <- Unsure what this does, but only 0x21 works.
                     &actualWidth,
                     &actualHeight,
@@ -159,6 +179,20 @@ namespace pixy_cam
                     std::cerr << "Error sending frame for encoding: " + std::to_string( return_value ) << std::endl;
                     throw FfmpegException( return_value );
                 }
+                while( avcodec_receive_packet( this->outputCodecContext, &packet ) >= 0 )
+                {
+                    av_interleaved_write_frame( this->outputFormatContext, &packet );
+                    av_packet_unref( &packet );
+                }
+
+            } // End while loop.
+
+            // Write the trailer
+            return_value = av_write_trailer( this->outputFormatContext );
+            if( return_value < 0 )
+            {
+                std::cerr << "Error sending trailer" << std::endl;
+                throw FfmpegException( return_value );
             }
         }
         catch( const std::exception& e )
@@ -215,7 +249,7 @@ namespace pixy_cam
         {
             throw FfmpegException( "Can not find H264 codec." );
         }
-        int returnCode = avformat_alloc_output_context2( &this->outputFormatContext, nullptr, "rtp", this->url.c_str() );
+        int returnCode = avformat_alloc_output_context2( &this->outputFormatContext, nullptr, "flv", this->url.c_str() );
         if( returnCode < 0 )
         {
             std::cerr << "Error allocating output format context" << std::endl;
@@ -227,6 +261,10 @@ namespace pixy_cam
         {
             throw FfmpegException( "Could not allocate output stream." );
         }
+        this->outputStream->codecpar->codec_id = AV_CODEC_ID_H264;
+        this->outputStream->codecpar->width = this->camera.GetWidth();
+        this->outputStream->codecpar->height = this->camera.GetHeight();
+        this->outputStream->codecpar->format = AV_PIX_FMT_YUV420P;
 
         this->outputCodecContext = avcodec_alloc_context3( codec );
         if( !this->outputCodecContext )
@@ -234,21 +272,35 @@ namespace pixy_cam
             throw FfmpegException( "Could not allocate output codec context." );
         }
 
+        avcodec_parameters_to_context(this->outputCodecContext, this->outputStream->codecpar);
+
         // Set codec parameters
-        this->outputCodecContext->codec_id = AV_CODEC_ID_H264;
-        this->outputCodecContext->width = this->camera.GetWidth();
-        this->outputCodecContext->height = this->camera.GetHeight();
-        this->outputCodecContext->time_base = (AVRational){1, 25};
-        this->outputCodecContext->framerate = (AVRational){25, 1};
-        this->outputCodecContext->gop_size = 10;
-        this->outputCodecContext->max_b_frames = 1;
-        this->outputCodecContext->pix_fmt = AV_PIX_FMT_YUV420P;
+        //this->outputCodecContext->codec_id = AV_CODEC_ID_H264;
+        //this->outputCodecContext->width = this->camera.GetWidth();
+        //this->outputCodecContext->height = this->camera.GetHeight();
+        //this->outputCodecContext->framerate = (AVRational){25, 1};
+        //this->outputCodecContext->gop_size = 10;
+        //this->outputCodecContext->max_b_frames = 1;
+        //this->outputCodecContext->pix_fmt = AV_PIX_FMT_YUV420P;
+        this->outputCodecContext->time_base = (AVRational){1, 25}; // 25fps
 
         returnCode = avcodec_open2( this->outputCodecContext, codec, nullptr );
         if( returnCode < 0 )
         {
             std::cerr << "Could not open output codec" << std::endl;
             throw FfmpegException( returnCode );
+        }
+
+        // Initialize output file
+        if( !( this->outputFormatContext->oformat->flags & AVFMT_NOFILE ) )
+        {
+            returnCode = avio_open( &this->outputFormatContext->pb, this->url.c_str(), AVIO_FLAG_WRITE );
+            if( returnCode < 0 )
+            {
+                std::cerr << "Could not open output stream" << std::endl;
+                throw FfmpegException( returnCode );
+            }
+            this->fileOpened = true;
         }
 
         // Setup Frame
