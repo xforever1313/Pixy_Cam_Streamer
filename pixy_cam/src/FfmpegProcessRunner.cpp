@@ -48,7 +48,7 @@ namespace pixy_cam
         {
             return;
         }
-        
+
         int stdinPipe[2] = { 0, 0 };
         int stdoutPipe[2]= { 0, 0 };
         int stderrPipe[2]= { 0, 0 };
@@ -230,19 +230,19 @@ namespace pixy_cam
     void FfmpegProcessRunner::StdOutThreadEntry()
     {
         ReadLoop( this->stdoutFile, std::cout );
-        
+
         std::lock_guard<std::mutex>( this->printLock );
         std::cout << "stdout thread exiting" << std::endl;
     }
-    
+
     void FfmpegProcessRunner::StdErrThreadEntry()
     {
         ReadLoop( this->stderrFile, std::cerr );
-        
+
         std::lock_guard<std::mutex>( this->printLock );
         std::cerr << "stderr thread exiting" << std::endl;
     }
-    
+
     void FfmpegProcessRunner::StdInThreadEntry()
     {
         uint16_t actualWidth;
@@ -307,6 +307,17 @@ namespace pixy_cam
                 );
                 std::lock_guard<std::mutex>( this->printLock );
                 outFile << output;
+            }
+            else if( bytesRead == 0 )
+            {
+                // End-of-file, exit loop.
+                break;
+            }
+            else
+            {
+                std::lock_guard<std::mutex>( this->printLock );
+                outFile << "Failed to read output from sub-process: " << bytesRead << std::endl;
+                break;
             }
         }
 
