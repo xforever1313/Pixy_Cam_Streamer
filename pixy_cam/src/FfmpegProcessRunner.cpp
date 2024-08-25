@@ -189,6 +189,8 @@ namespace pixy_cam
                 std::bind( &FfmpegProcessRunner::StdInThreadEntry, this )
             );
         }
+
+        this->isRunning = true;
     }
 
     void FfmpegProcessRunner::StopLoop()
@@ -235,7 +237,7 @@ namespace pixy_cam
     
     void FfmpegProcessRunner::StdErrThreadEntry()
     {
-        ReadLoop( this->stdoutFile, std::cerr );
+        ReadLoop( this->stderrFile, std::cerr );
         
         std::lock_guard<std::mutex>( this->printLock );
         std::cerr << "stderr thread exiting" << std::endl;
