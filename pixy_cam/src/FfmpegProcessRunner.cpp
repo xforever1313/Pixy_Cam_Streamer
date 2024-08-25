@@ -98,7 +98,7 @@ namespace pixy_cam
             close( stderrPipe[0] );
 
             execl(
-                "ffmpeg",
+                "/usr/bin/ffmpeg",
                 // Get Video From stdin.
                 "-f",
                 "rawvideo",
