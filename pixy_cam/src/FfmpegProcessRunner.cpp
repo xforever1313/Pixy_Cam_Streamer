@@ -1,3 +1,4 @@
+#include <chrono>
 #include <functional>
 #include <iostream>
 #include <mutex>
@@ -97,61 +98,65 @@ namespace pixy_cam
             close( stdoutPipe[0] );
             close( stderrPipe[0] );
 
+            std::string sizeArg = std::to_string( this->camera.GetWidth() ) + "x" + std::to_string( this->camera.GetHeight() );
+
             execl(
                 "/usr/bin/ffmpeg",
+                "-hide_banner",
+                "-loglevel",
+                "info",
+
+		// Get null audio
+		"-ar",
+		"44100",
+		"-ac",
+		"2",
+		"-acodec",
+		"pcm_s16le",
+		"-f",
+		"s16le",
+		"-ac",
+		"2",
+		"-i",
+		"/dev/zero",
+
                 // Get Video From stdin.
                 "-f",
                 "rawvideo",
                 "-pixel_format",
                 "bayer_bggr8",
                 "-video_size",
-                std::to_string( this->camera.GetWidth() ) + "x" + std::to_string( this->camera.GetHeight() ),
+                sizeArg.c_str(),
                 "-framerate",
-                "10",
+                "2",
                 "-i",
-                "-" // <- From stdin.
+                "pipe:",  // <- From stdin.
 
-                // Get null audio.
-                "-f",
-                "lavfi",
-                "-i",
-                "anullsrc=channel_layout-stereo:sample_rate=44100",
+		// Set audio codec
+		"-acodec",
+		"aac",
+		"-ab",
+		"128k",
+		"-g",
+		"50",
+		"-strict",
+		"experimental",
 
-                // Set video encoding using H.264
-                // with fast preset encoding and
-                // bitrate of 3000k.
-                "-c:v",
-                "libx264",
-                "-preset",
-                "verfast",
-                "-b:v",
-                "3000k",
-                "-maxrate",
-                "3000k",
-                "-bufsize",
-                "6000k",
-
-                // Set pixel format to YUV420P
-                // and GOP size to 60.
-                "-pix_fmt",
-                "yuv420p",
+                // Set video codec
+		"-vcodec",
+                "h264",
                 "-g",
-                "60",
-
-                // Sets up audio using AAC
-                // with a bitrate of 128k.
-                "-c:a",
-                "aac",
-                "b:a",
-                "128k",
-
-                // Maps the video to the first input.
-                "-map",
-                "0:v",
-
-                // Maps the audio to the second input.
-                "-map",
-                "1:a",
+                "2",
+                "-preset",
+                "ultrafast",
+                "-crf",
+                "1",
+                "-minrate",
+                "400k",
+                "-maxrate",
+                "1000k",
+                "-bufsize",
+                "1000k",
 
                 // Output to the stream.
                 "-f",
@@ -275,6 +280,7 @@ namespace pixy_cam
                 {
                     throw FfmpegException( "Could not write bytes to ffmpeg" );
                 }
+		std::this_thread::sleep_for( std::chrono::milliseconds( 480 ) );
             }
         }
         catch( const std::exception& e )
@@ -306,7 +312,7 @@ namespace pixy_cam
                     &readBuffer[bytesRead - 1]
                 );
                 std::lock_guard<std::mutex>( this->printLock );
-                outFile << output;
+                outFile << output << std::endl;
             }
             else if( bytesRead == 0 )
             {
