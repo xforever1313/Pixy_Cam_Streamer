@@ -149,4 +149,9 @@ int main( int argc, char* argv[] )
         std::cout << "FATAL" << e.what() << std::endl;
         return 100;
     }
+    catch( ... )
+    {
+        std::cout << "Unknown Exception" << std::endl;
+        return 200;
+    }
 }
