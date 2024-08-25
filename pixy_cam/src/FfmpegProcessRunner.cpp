@@ -266,7 +266,7 @@ namespace pixy_cam
                 }
 
                 ssize_t bytesWritten = ::write(
-                    this->ffmpegProcessId,
+                    this->stdinFile,
                     rawBytes.data(),
                     rawBytes.size()
                 );
