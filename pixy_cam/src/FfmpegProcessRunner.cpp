@@ -55,21 +55,21 @@ namespace pixy_cam
 
         if( pipe( stdinPipe ) == -1 )
         {
-            throw new FfmpegException(
+            throw FfmpegException(
                 "Could not make stdin pipe"
             );
         }
 
         if( pipe( stdoutPipe ) == -1 )
         {
-            throw new FfmpegException(
+            throw FfmpegException(
                 "Could not make stdout pipe"
             );
         }
 
         if( pipe( stderrPipe ) == -1 )
         {
-            throw new FfmpegException(
+            throw FfmpegException(
                 "Could not make stderr pipe"
             );
         }
@@ -77,7 +77,7 @@ namespace pixy_cam
         pid_t pid = fork();
         if( pid == -1 )
         {
-            throw new FfmpegException(
+            throw FfmpegException(
                 "Forking ffmpeg process failed: " + std::to_string( pid )
             );
         }
@@ -265,7 +265,7 @@ namespace pixy_cam
 
                 if( bytesWritten == -1 )
                 {
-                    throw new FfmpegException( "Could not write bytes to ffmpeg" );
+                    throw FfmpegException( "Could not write bytes to ffmpeg" );
                 }
             }
         }
