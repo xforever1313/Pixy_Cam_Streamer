@@ -17,7 +17,8 @@ extern "C" {
 
 #include "DateVersion.h"
 #include "FfmpegException.h"
-#include "FfmpegRunner.h"
+//#include "FfmpegRunner.h"
+#include "FfmpegProcessRunner.h"
 #include "HttpRequestFactory.h"
 #include "PixyCamera.h"
 #include "PixyCameraException.h"
@@ -120,7 +121,7 @@ int main( int argc, char* argv[] )
         Poco::Net::HTTPServer server( new pixy_cam::HttpRequestFactory( camera ), socket, serverParams );
         server.start();
 
-        pixy_cam::FfmpegRunner ffmpeg( camera, url );
+        pixy_cam::FfmpegProcessRunner ffmpeg( camera, url );
         ffmpeg.Init();
         ffmpeg.StartLoop();
 
