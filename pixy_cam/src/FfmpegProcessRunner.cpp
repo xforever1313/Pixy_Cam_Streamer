@@ -159,7 +159,7 @@ namespace pixy_cam
                 this->url.c_str(),
                 nullptr
             );
-            exit( 1 );
+            exit( 0 );
         }
         else
         {
