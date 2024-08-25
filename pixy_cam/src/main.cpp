@@ -125,7 +125,7 @@ int main( int argc, char* argv[] )
         ffmpeg.StartLoop();
 
         std::mutex m;
-        std::unique_lock lock(m);
+        std::unique_lock<std::mutex> lock(m);
         terminateEvent.wait( lock );
         std::cout<< "SIGNAL received, terminating." << std::endl;
         ffmpeg.StopLoop();
