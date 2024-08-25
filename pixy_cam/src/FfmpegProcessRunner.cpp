@@ -228,11 +228,17 @@ namespace pixy_cam
     void FfmpegProcessRunner::StdOutThreadEntry()
     {
         ReadLoop( this->stdoutFile, std::cout );
+        
+        std::lock_guard<std::mutex>( this->printLock );
+        std::cout << "stdout thread exiting" << std::endl;
     }
     
     void FfmpegProcessRunner::StdErrThreadEntry()
     {
         ReadLoop( this->stdoutFile, std::cerr );
+        
+        std::lock_guard<std::mutex>( this->printLock );
+        std::cerr << "stderr thread exiting" << std::endl;
     }
     
     void FfmpegProcessRunner::StdInThreadEntry()
@@ -274,6 +280,9 @@ namespace pixy_cam
             std::lock_guard<std::mutex>( this->printLock );
             std::cerr << e.what() << std::endl;
         }
+
+        std::lock_guard<std::mutex>( this->printLock );
+        std::cout << "stdin thread exiting" << std::endl;
     }
 
     void FfmpegProcessRunner::ReadLoop( int file, std::ostream& outFile )
