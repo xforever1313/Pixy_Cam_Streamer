@@ -121,6 +121,7 @@ int main( int argc, char* argv[] )
         server.start();
 
         pixy_cam::FfmpegRunner ffmpeg( camera, url );
+        ffmpeg.Init();
         ffmpeg.StartLoop();
 
         std::mutex m;

@@ -20,6 +20,7 @@ namespace pixy_cam
             FfmpegRunner( PixyCamera& camera, const std::string& url );
             ~FfmpegRunner();
 
+            void Init();
             void StartLoop();
             void StopLoop();
 

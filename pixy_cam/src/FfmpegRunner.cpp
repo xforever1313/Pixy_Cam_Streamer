@@ -41,14 +41,6 @@ namespace pixy_cam
     {
         StopLoop();
 
-        if( !( this->outputFormatContext->oformat->flags & AVFMT_NOFILE ) )
-        {
-            if( this->fileOpened )
-            {
-                avio_closep( &this->outputFormatContext->pb );
-            }
-        }
-
         if( this->packet != nullptr )
         {
             av_packet_free( &this->packet );
@@ -91,6 +83,12 @@ namespace pixy_cam
         this->thread = nullptr;
     }
 
+    void FfmpegRunner::Init()
+    {
+        CreateInputStream();
+        CreateOutputStream();
+    }
+
     void FfmpegRunner::StartLoop()
     {
         std::lock_guard<std::mutex>( this->startStopLock );
@@ -98,6 +96,19 @@ namespace pixy_cam
         {
             return;
         }
+
+        // Initialize output file
+        if( !( this->outputFormatContext->oformat->flags & AVFMT_NOFILE ) )
+        {
+            int returnCode = avio_open( &this->outputFormatContext->pb, this->url.c_str(), AVIO_FLAG_WRITE );
+            if( returnCode < 0 )
+            {
+                std::cerr << "Could not open output stream" << std::endl;
+                throw FfmpegException( returnCode );
+            }
+            this->fileOpened = true;
+        }
+
         this->thread = new std::thread( std::bind( &FfmpegRunner::ThreadEntry, this ) );
 
         this->keepRunning = true;
@@ -120,6 +131,14 @@ namespace pixy_cam
         this->keepRunning = false;
         this->thread->join();
         this->isRunning = false;
+
+        if( !( this->outputFormatContext->oformat->flags & AVFMT_NOFILE ) )
+        {
+            if( this->fileOpened )
+            {
+                avio_closep( &this->outputFormatContext->pb );
+            }
+        }
     }
 
     void FfmpegRunner::ThreadEntry()
@@ -129,9 +148,6 @@ namespace pixy_cam
         this->packet->size = 0;
         try
         {
-            CreateInputStream();
-            CreateOutputStream();
-
             uint16_t actualWidth;
             uint16_t actualHeight;
             std::vector<uint8_t> rawBytes;
@@ -297,18 +313,6 @@ namespace pixy_cam
         {
             std::cerr << "Could not open output codec" << std::endl;
             throw FfmpegException( returnCode );
-        }
-
-        // Initialize output file
-        if( !( this->outputFormatContext->oformat->flags & AVFMT_NOFILE ) )
-        {
-            returnCode = avio_open( &this->outputFormatContext->pb, this->url.c_str(), AVIO_FLAG_WRITE );
-            if( returnCode < 0 )
-            {
-                std::cerr << "Could not open output stream" << std::endl;
-                throw FfmpegException( returnCode );
-            }
-            this->fileOpened = true;
         }
 
         // Setup Frame
