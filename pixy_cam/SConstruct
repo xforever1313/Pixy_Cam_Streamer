@@ -11,10 +11,6 @@ defines = ["VERSION=" + '"\\"' + version + '\\""']
 compileFlags = ["-Wall", "-Wextra", "-std=c++17", "-Wno-unused-parameter"]
 includePaths = ["include", "/usr/include/libusb-1.0", "/usr/include/x86_64-linux-gnu"]
 libs = [
-    "avcodec",
-    "avformat",
-    "avutil",
-    "swscale",
     "pixyusb",
     "boost_thread",
     "boost_chrono",
