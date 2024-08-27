@@ -208,11 +208,14 @@ namespace pixy_cam
 
         this->keepProcessing = false;
 
+	this->stdinThread->join();
+        close( this->stdinFile );
+
+	kill( this->ffmpegProcessId, SIGINT );
         close( this->ffmpegProcessId );
         int exitCode;
         waitpid( this->ffmpegProcessId, &exitCode, 0 );
 
-        this->stdinThread->join();
         this->stdoutThread->join();
         this->stderrThread->join();
 
@@ -225,7 +228,6 @@ namespace pixy_cam
         delete this->stdoutThread;
         this->stdoutThread = nullptr;
 
-        close( this->stdinFile );
         close( this->stderrFile );
         close( this->stdoutFile );
 
