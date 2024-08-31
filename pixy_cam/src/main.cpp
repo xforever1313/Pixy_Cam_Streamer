@@ -115,16 +115,16 @@ int main( int argc, char* argv[] )
         serverParams->setMaxThreads( 1 );
         Poco::Net::ServerSocket socket( port );
         Poco::Net::HTTPServer server( new pixy_cam::HttpRequestFactory( ffmpeg, camera ), socket, serverParams );
-        server.start();
 
+        server.start();
         ffmpeg.StartLoop();
 
         std::mutex m;
-        std::unique_lock<std::mutex> lock(m);
+        std::unique_lock<std::mutex> lock( m );
         terminateEvent.wait( lock );
         std::cout<< "SIGNAL received, terminating." << std::endl;
-        ffmpeg.StopLoop();
         server.stop();
+        ffmpeg.StopLoop();
 
         return 0;
     }
