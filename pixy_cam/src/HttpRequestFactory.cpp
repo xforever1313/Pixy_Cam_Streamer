@@ -9,13 +9,14 @@
 #include "HttpRequestFactory.h"
 #include "NotFoundHttpRequestHandler.h"
 #include "SetBrightnessHttpRequestHandler.h"
+#include "StreamStatusRequestHandler.h"
 #include "TakePictureHttpRequestHandler.h"
 
 namespace pixy_cam
 {
     HttpRequestFactory::HttpRequestFactory( FfmpegProcessRunner& ffmpeg, PixyCamera& camera ) :
-        camera( camera ),
-        ffmpeg( ffmpeg )
+        ffmpeg( ffmpeg ),
+        camera( camera )
     {
     }
 
@@ -43,6 +44,10 @@ namespace pixy_cam
         else if( "/stop_stream" == request.getURI() )
         {
             return new CameraStopRequest( this->ffmpeg );
+        }
+        else if( "/stream_status" == request.getURI() )
+        {
+            return new StreamStatusRequestHandler( this->ffmpeg );
         }
         else
         {
