@@ -18,6 +18,8 @@ namespace pixy_cam
             void StartLoop();
             void StopLoop();
 
+            std::string GetStatus() const;
+
         private:
             FfmpegProcessRunner() = delete;
 
@@ -25,10 +27,13 @@ namespace pixy_cam
             void StdErrThreadEntry();
             void StdInThreadEntry();
             void ReadLoop( int file, std::ostream& outFile );
+            void SetStatus( const std::string& str );
+
+            const uint8_t fps;
 
             PixyCamera& camera;
             const std::string& url;
-            std::mutex startStopLock;
+            mutable std::mutex startStopLock;
 
             pid_t ffmpegProcessId;
             int stdinFile;
@@ -42,6 +47,9 @@ namespace pixy_cam
 
             bool isRunning;
             volatile bool keepProcessing;
+            
+            std::string statusString;
+            mutable std::mutex statusLock;
     };
 }
 

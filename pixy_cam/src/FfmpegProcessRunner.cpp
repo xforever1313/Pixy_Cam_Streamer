@@ -13,6 +13,7 @@
 namespace pixy_cam
 {
     FfmpegProcessRunner::FfmpegProcessRunner( PixyCamera& camera, const std::string& url ) :
+        fps( 10 ),
         camera( camera ),
         url( url ),
         startStopLock(),
@@ -28,7 +29,10 @@ namespace pixy_cam
         printLock(),
 
         isRunning( false ),
-        keepProcessing( false )
+        keepProcessing( false ),
+
+        statusString( "STOPPED" ),
+        statusLock()
     {
     }
 
@@ -40,6 +44,20 @@ namespace pixy_cam
     void FfmpegProcessRunner::Init()
     {
         // Nothing to do.
+    }
+
+    std::string FfmpegProcessRunner::GetStatus() const
+    {
+        {
+            std::lock_guard<std::mutex>( this->startStopLock );
+            if( this->isRunning )
+            {
+                return "STOPPED";
+            }
+        }
+
+        std::lock_guard<std::mutex>( this->statusLock );
+        return this->statusString;
     }
 
     void FfmpegProcessRunner::StartLoop()
@@ -128,7 +146,7 @@ namespace pixy_cam
                 "-video_size",
                 sizeArg.c_str(),
                 "-framerate",
-                "2",
+                std::to_string( this->fps ).c_str(),
                 "-i",
                 "pipe:",  // <- From stdin.
 
@@ -208,10 +226,10 @@ namespace pixy_cam
 
         this->keepProcessing = false;
 
-	this->stdinThread->join();
+        this->stdinThread->join();
         close( this->stdinFile );
 
-	kill( this->ffmpegProcessId, SIGINT );
+        kill( this->ffmpegProcessId, SIGINT );
         close( this->ffmpegProcessId );
         int exitCode;
         waitpid( this->ffmpegProcessId, &exitCode, 0 );
@@ -258,6 +276,7 @@ namespace pixy_cam
 
         try
         {
+            SetStatus( "OK" );
             while( this->keepProcessing )
             {
                 int returnValue = this->camera.GetFrame(
@@ -282,13 +301,19 @@ namespace pixy_cam
                 {
                     throw FfmpegException( "Could not write bytes to ffmpeg" );
                 }
-		std::this_thread::sleep_for( std::chrono::milliseconds( 480 ) );
+
+                float timeForFps = 1.0f / this->fps * 1000.0;
+                timeForFps -=20; // Need to go slightly faster than the FPS so Ffmpeg doesn't break.
+
+                std::this_thread::sleep_for( std::chrono::milliseconds( static_cast<int64_t>( timeForFps ) ) );
             }
+            SetStatus( "EXITING" );
         }
         catch( const std::exception& e )
         {
             std::lock_guard<std::mutex>( this->printLock );
             std::cerr << e.what() << std::endl;
+            SetStatus( e.what() );
         }
 
         std::lock_guard<std::mutex>( this->printLock );
@@ -331,5 +356,11 @@ namespace pixy_cam
 
         std::lock_guard<std::mutex>( this->printLock );
         outFile << std::endl;
+    }
+
+    void FfmpegProcessRunner::SetStatus( const std::string& str )
+    {
+        std::lock_guard<std::mutex>( this->statusLock );
+        this->statusString = str;
     }
 }
