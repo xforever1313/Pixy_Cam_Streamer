@@ -9,12 +9,6 @@
 #include <string>
 #include <unistd.h>
 
-extern "C" {
-#include <libavformat/avformat.h>
-#include <libavcodec/avcodec.h>
-#include <libavutil/imgutils.h>
-}
-
 #include "DateVersion.h"
 #include "FfmpegException.h"
 #include "FfmpegProcessRunner.h"
