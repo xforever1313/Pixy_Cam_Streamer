@@ -5,6 +5,7 @@
 #include <Poco/Net/HTTPRequestHandlerFactory.h>
 #include <string>
 
+#include "FfmpegProcessRunner.h"
 #include "PixyCamera.h"
 
 namespace pixy_cam
@@ -12,13 +13,15 @@ namespace pixy_cam
     class HttpRequestFactory : public Poco::Net::HTTPRequestHandlerFactory
     {
         public:
-            HttpRequestFactory( PixyCamera& camera );
+            HttpRequestFactory( FfmpegProcessRunner& ffmpeg, PixyCamera& camera );
             ~HttpRequestFactory();
 
             Poco::Net::HTTPRequestHandler *createRequestHandler( const Poco::Net::HTTPServerRequest &request ) override;
 
         private:
             HttpRequestFactory() = delete;
+
+            FfmpegProcessRunner& ffmpeg;
             PixyCamera& camera;
     };
 }

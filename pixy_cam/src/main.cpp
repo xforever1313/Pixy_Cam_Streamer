@@ -17,7 +17,6 @@ extern "C" {
 
 #include "DateVersion.h"
 #include "FfmpegException.h"
-//#include "FfmpegRunner.h"
 #include "FfmpegProcessRunner.h"
 #include "HttpRequestFactory.h"
 #include "PixyCamera.h"
@@ -113,16 +112,17 @@ int main( int argc, char* argv[] )
         camera.SetAutoWhiteBalance( true );
         camera.SetAutoExposureCompensation( true );
 
+        pixy_cam::FfmpegProcessRunner ffmpeg( camera, url );
+        ffmpeg.Init();
+
         // Poco is apparently smart enough to delete this automatically.
         Poco::Net::HTTPServerParams* serverParams = new Poco::Net::HTTPServerParams();
         serverParams->setMaxQueued( 100 );
         serverParams->setMaxThreads( 1 );
         Poco::Net::ServerSocket socket( port );
-        Poco::Net::HTTPServer server( new pixy_cam::HttpRequestFactory( camera ), socket, serverParams );
+        Poco::Net::HTTPServer server( new pixy_cam::HttpRequestFactory( ffmpeg, camera ), socket, serverParams );
         server.start();
 
-        pixy_cam::FfmpegProcessRunner ffmpeg( camera, url );
-        ffmpeg.Init();
         ffmpeg.StartLoop();
 
         std::mutex m;

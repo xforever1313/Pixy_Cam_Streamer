@@ -3,6 +3,9 @@
 #include <Poco/Net/HTTPRequestHandlerFactory.h>
 #include <Poco/Net/HTTPServerRequest.h>
 
+#include "CameraStartRequest.h"
+#include "CameraStopRequest.h"
+#include "FfmpegProcessRunner.h"
 #include "HttpRequestFactory.h"
 #include "NotFoundHttpRequestHandler.h"
 #include "SetBrightnessHttpRequestHandler.h"
@@ -10,8 +13,9 @@
 
 namespace pixy_cam
 {
-    HttpRequestFactory::HttpRequestFactory( PixyCamera& camera ) :
-        camera( camera )
+    HttpRequestFactory::HttpRequestFactory( FfmpegProcessRunner& ffmpeg, PixyCamera& camera ) :
+        camera( camera ),
+        ffmpeg( ffmpeg )
     {
     }
 
@@ -31,6 +35,14 @@ namespace pixy_cam
         else if( "/capture" == request.getURI() )
         {
             return new TakePictureHttpRequestHandler( this->camera );
+        }
+        else if( "/start_stream" == request.getURI() )
+        {
+            return new CameraStartRequest( this->ffmpeg );
+        }
+        else if( "/stop_stream" == request.getURI() )
+        {
+            return new CameraStopRequest( this->ffmpeg );
         }
         else
         {

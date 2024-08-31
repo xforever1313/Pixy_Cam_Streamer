@@ -106,19 +106,19 @@ namespace pixy_cam
                 "-loglevel",
                 "info",
 
-		// Get null audio
-		"-ar",
-		"44100",
-		"-ac",
-		"2",
-		"-acodec",
-		"pcm_s16le",
-		"-f",
-		"s16le",
-		"-ac",
-		"2",
-		"-i",
-		"/dev/zero",
+                // Get null audio
+                "-ar",
+                "44100",
+                "-ac",
+                "2",
+                "-acodec",
+                "pcm_s16le",
+                "-f",
+                "s16le",
+                "-ac",
+                "2",
+                "-i",
+                "/dev/zero",
 
                 // Get Video From stdin.
                 "-f",
@@ -132,18 +132,18 @@ namespace pixy_cam
                 "-i",
                 "pipe:",  // <- From stdin.
 
-		// Set audio codec
-		"-acodec",
-		"aac",
-		"-ab",
-		"128k",
-		"-g",
-		"50",
-		"-strict",
-		"experimental",
+                // Set audio codec
+                "-acodec",
+                "aac",
+                "-ab",
+                "128k",
+                "-g",
+                "50",
+                "-strict",
+                "experimental",
 
                 // Set video codec
-		"-vcodec",
+                "-vcodec",
                 "h264",
                 "-g",
                 "2",
