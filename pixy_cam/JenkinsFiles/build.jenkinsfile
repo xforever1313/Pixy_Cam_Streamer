@@ -4,14 +4,14 @@ void DoDockerBuild()
 {
         stage( 'clean' )
         {
-            steps
+            script
             {
                 cleanWs();
             }
         }
         stage( 'checkout' )
         {
-            steps
+            script
             {
                 checkout scm;
             }
