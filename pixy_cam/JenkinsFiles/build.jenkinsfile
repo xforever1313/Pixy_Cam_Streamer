@@ -70,7 +70,7 @@ pipeline
                         }
                         stage( 'Archive Artifacts' )
                         {
-                            script
+                            steps
                             {
                                 archiveArtifacts 'pixy_cam/install/deb/bin/*.deb';
                             }
@@ -96,7 +96,7 @@ pipeline
                     }
                     stages
                     {
-stage( 'clean' )
+                        stage( 'clean' )
                         {
                             steps
                             {
@@ -136,7 +136,7 @@ stage( 'clean' )
                         }
                         stage( 'Archive Artifacts' )
                         {
-                            script
+                            steps
                             {
                                 archiveArtifacts 'pixy_cam/install/deb/bin/*.deb';
                             }
