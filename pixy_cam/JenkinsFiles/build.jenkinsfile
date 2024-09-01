@@ -86,10 +86,7 @@ pipeline
                         {
                             steps
                             {
-                                script
-                                {
-                                    DoDockerBuild();
-                                }
+                                DoDockerBuild();
                             }
                         }
                     }
@@ -117,10 +114,7 @@ pipeline
                         {
                             steps
                             {
-                                script
-                                {
-                                    DoDockerBuild();
-                                }
+                                DoDockerBuild();
                             }
                         }
                     }
