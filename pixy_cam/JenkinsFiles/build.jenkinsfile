@@ -53,6 +53,7 @@ pipeline
                                     filename 'ubuntu_build_env.dockerfile'
                                     dir 'checkout/pixy_cam/Docker'
                                     label 'PixyCamBuildEnv'
+                                    additionalBuildArgs '--label PixyCamBuildEnv'
                                     args "-e HOME='${env.WORKSPACE}'"
                                     reuseNode true
                                 }
