@@ -28,12 +28,20 @@ SetOption('num_jobs', cpu_count())
 baseDir = os.path.abspath( "." )
 installDir = os.path.join( baseDir, "install" )
 debDir = os.path.join( installDir, "deb" )
+libPixyFolder = os.path.join( baseDir, "libpixy" )
+pixyCheckout = os.path.join( libPixyFolder, "pixy" )
 
 version = "1.0.0"
 
 defines = ["VERSION=" + '"\\"' + version + '\\""']
 compileFlags = ["-Wall", "-Wextra", "-std=c++17", "-Wno-unused-parameter"]
-includePaths = ["include", "/usr/include/libusb-1.0", "/usr/include/x86_64-linux-gnu"]
+includePaths = [
+    "include",
+    os.path.join( pixyCheckout, "src", "common", "inc" ),
+    os.path.join( pixyCheckout, "src", "host", "libpixyusb" ),
+    "/usr/include/libusb-1.0",
+    "/usr/include/x86_64-linux-gnu",
+]
 libs = [
     "pixyusb",
     "boost_thread",
@@ -58,8 +66,8 @@ baseEnv = Environment(
 )
 
 libPixyEnv = baseEnv.Clone(
-    LIBPIXY_DIR=os.path.join( baseDir, "libpixy" ),
-    PIXY_CHECKOUT=os.path.join( baseDir, "libpixy", "pixy" )
+    LIBPIXY_DIR=libPixyFolder,
+    PIXY_CHECKOUT=pixyCheckout
 )
 
 buildEnv = baseEnv.Clone(
