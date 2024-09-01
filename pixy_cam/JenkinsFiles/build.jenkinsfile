@@ -2,7 +2,7 @@
 
 void CleanupDockerImage()
 {
-    def imageId = sh(script: "docker images -q PixyCamBuildEnv", returnStdout: true).trim();
+    def imageId = sh(script: "docker images -q --filter label=PixyCamBuildEnv", returnStdout: true).trim();
     if( imageId )
     {
         sh "docker rmi -f ${imageId}";
@@ -121,6 +121,7 @@ pipeline
                                     dir 'checkout/pixy_cam/Docker'
                                     label 'PixyCamBuildEnv'
                                     args "-e HOME='${env.WORKSPACE}'"
+                                    additionalBuildArgs '--label PixyCamBuildEnv'
                                     reuseNode true
                                 }
                             }
