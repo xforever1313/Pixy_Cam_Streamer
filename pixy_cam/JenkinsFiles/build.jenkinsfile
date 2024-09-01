@@ -1,0 +1,130 @@
+@Library( "X13JenkinsLib" )_
+
+pipeline
+{
+    agent none
+    options
+    {
+        skipDefaultCheckout( true );
+    }
+    stages
+    {
+        stage( "Build" )
+        {
+            parallel
+            {
+                stage( "Linux x64" )
+                {
+                    agent
+                    {
+                        label "linux && x64 && docker";
+                    }
+                    stages
+                    {
+                        stage( 'clean' )
+                        {
+                            steps
+                            {
+                                cleanWs();
+                            }
+                        }
+                        stage( 'checkout' )
+                        {
+                            steps
+                            {
+                                checkout scm;
+                            }
+                        }
+                        stage( 'In Docker' )
+                        {
+                            agent
+                            {
+                                dockerfile
+                                {
+                                    filename 'ubuntu_build_env.dockerfile'
+                                    dir 'Docker'
+                                    label 'pixy-cam-build-env'
+                                    args "-e HOME='${env.WORKSPACE}'"
+                                    reuseNode true
+                                }
+                            }
+                            stages
+                            {
+                                stage( 'build deb' )
+                                {
+                                    steps
+                                    {
+                                        sh 'cd ./checkout/pixy_cam && scons debian_build';
+                                    }
+                                }
+                            }
+                        }
+                        stage( 'Archive Artifacts' )
+                        {
+                            steps
+                            {
+                                archiveArtifacts 'pixy_cam/install/deb/bin/*.deb';
+                            }
+                        }
+                    }
+                }
+
+                stage( "Linux arm64" )
+                {
+                    agent
+                    {
+                        label "linux && arm64 && docker";
+                    }
+                    stages
+                    {
+                        stage( 'clean' )
+                        {
+                            steps
+                            {
+                                cleanWs();
+                            }
+                        }
+                        stage( 'checkout' )
+                        {
+                            steps
+                            {
+                                checkout scm;
+                            }
+                        }
+                        stage( 'In Docker' )
+                        {
+                            agent
+                            {
+                                dockerfile
+                                {
+                                    filename 'ubuntu_build_env.dockerfile'
+                                    dir 'docker'
+                                    label 'pixy-cam-build-env'
+                                    args "-e HOME='${env.WORKSPACE}'"
+                                    reuseNode true
+                                }
+                            }
+                            stages
+                            {
+                                stage( 'build deb' )
+                                {
+                                    steps
+                                    {
+                                        sh 'cd ./checkout/pixy_cam && scons debian_build';
+                                    }
+                                }
+                            }
+                        }
+                        stage( 'Archive Artifacts' )
+                        {
+                            steps
+                            {
+                                archiveArtifacts 'pixy_cam/install/deb/bin/*.deb';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
