@@ -2,6 +2,8 @@
 
 void DoDockerBuild()
 {
+    stages
+    {
         stage( 'clean' )
         {
             steps
@@ -47,6 +49,7 @@ void DoDockerBuild()
                 archiveArtifacts 'pixy_cam/install/deb/bin/*.deb';
             }
         }
+    }
 }
 
 void CleanupDockerImage()
@@ -81,7 +84,7 @@ pipeline
                     {
                         stage( "Common Docker Build" )
                         {
-                            stages
+                            steps
                             {
                                 DoDockerBuild();
                             }
@@ -109,7 +112,7 @@ pipeline
                     {
                         stage( "Common Docker Build" )
                         {
-                            stages
+                            steps
                             {
                                 DoDockerBuild();
                             }
