@@ -79,9 +79,15 @@ pipeline
                     }
                     stages
                     {
-                        script
+                        stage( "Common Docker Build" )
                         {
-                            DoDockerBuild();
+                            steps
+                            {
+                                script
+                                {
+                                    DoDockerBuild();
+                                }
+                            }
                         }
                     }
                     post
@@ -104,9 +110,15 @@ pipeline
                     }
                     stages
                     {
-                        script
+                        stage( "Common Docker Build" )
                         {
-                            DoDockerBuild();
+                            steps
+                            {
+                                script
+                                {
+                                    DoDockerBuild();
+                                }
+                            }
                         }
                     }
                     post
