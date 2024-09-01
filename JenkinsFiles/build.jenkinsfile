@@ -51,7 +51,7 @@ pipeline
                                 dockerfile
                                 {
                                     filename 'ubuntu_build_env.dockerfile'
-                                    dir 'checkout/pixy_cam/Docker'
+                                    dir 'checkout/Docker'
                                     label 'PixyCamBuildEnv'
                                     additionalBuildArgs '--label PixyCamBuildEnv'
                                     args "-e HOME='${env.WORKSPACE}'"
@@ -64,7 +64,7 @@ pipeline
                                 {
                                     steps
                                     {
-                                        sh 'cd ./checkout/pixy_cam && scons debian_build';
+                                        sh 'cd ./checkout && scons debian_build';
                                     }
                                 }
                             }
@@ -73,7 +73,7 @@ pipeline
                         {
                             steps
                             {
-                                archiveArtifacts 'pixy_cam/install/deb/bin/*.deb';
+                                archiveArtifacts 'install/deb/bin/*.deb';
                             }
                         }
                     }
@@ -118,7 +118,7 @@ pipeline
                                 dockerfile
                                 {
                                     filename 'ubuntu_build_env.dockerfile'
-                                    dir 'checkout/pixy_cam/Docker'
+                                    dir 'checkout/Docker'
                                     label 'PixyCamBuildEnv'
                                     args "-e HOME='${env.WORKSPACE}'"
                                     additionalBuildArgs '--label PixyCamBuildEnv'
@@ -131,7 +131,7 @@ pipeline
                                 {
                                     steps
                                     {
-                                        sh 'cd ./checkout/pixy_cam && scons debian_build';
+                                        sh 'cd ./checkout && scons debian_build';
                                     }
                                 }
                             }
@@ -140,7 +140,7 @@ pipeline
                         {
                             steps
                             {
-                                archiveArtifacts 'pixy_cam/install/deb/bin/*.deb';
+                                archiveArtifacts 'install/deb/bin/*.deb';
                             }
                         }
                     }
