@@ -2,49 +2,52 @@
 
 void DoDockerBuild()
 {
-    stage( 'clean' )
+    stages
     {
-        steps
+        stage( 'clean' )
         {
-            cleanWs();
-        }
-    }
-    stage( 'checkout' )
-    {
-        steps
-        {
-            checkout scm;
-        }
-    }
-    stage( 'In Docker' )
-    {
-        agent
-        {
-            dockerfile
+            steps
             {
-                filename 'ubuntu_build_env.dockerfile'
-                dir 'checkout/pixy_cam/Docker'
-                label 'PixyCamBuildEnv'
-                args "-e HOME='${env.WORKSPACE}'"
-                reuseNode true
+                cleanWs();
             }
         }
-        stages
+        stage( 'checkout' )
         {
-            stage( 'build deb' )
+            steps
             {
-                steps
+                checkout scm;
+            }
+        }
+        stage( 'In Docker' )
+        {
+            agent
+            {
+                dockerfile
                 {
-                    sh 'cd ./checkout/pixy_cam && scons debian_build';
+                    filename 'ubuntu_build_env.dockerfile'
+                    dir 'checkout/pixy_cam/Docker'
+                    label 'PixyCamBuildEnv'
+                    args "-e HOME='${env.WORKSPACE}'"
+                    reuseNode true
+                }
+            }
+            stages
+            {
+                stage( 'build deb' )
+                {
+                    steps
+                    {
+                        sh 'cd ./checkout/pixy_cam && scons debian_build';
+                    }
                 }
             }
         }
-    }
-    stage( 'Archive Artifacts' )
-    {
-        steps
+        stage( 'Archive Artifacts' )
         {
-            archiveArtifacts 'pixy_cam/install/deb/bin/*.deb';
+            steps
+            {
+                archiveArtifacts 'pixy_cam/install/deb/bin/*.deb';
+            }
         }
     }
 }
