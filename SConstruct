@@ -38,7 +38,7 @@ compileFlags = ["-Wall", "-Wextra", "-std=c++17", "-Wno-unused-parameter"]
 includePaths = [
     "include",
     os.path.join( pixyCheckout, "src", "common", "inc" ),
-    os.path.join( pixyCheckout, "src", "host", "libpixyusb" ),
+    os.path.join( pixyCheckout, "src", "host", "libpixyusb", "include" ),
     "/usr/include/libusb-1.0",
     "/usr/include/x86_64-linux-gnu",
 ]
