@@ -1,0 +1,3 @@
+[submodule "pixy"]
+	path = libpixy/pixy
+	url = https://github.com/xforever1313/pixy.git

@@ -1,0 +1,46 @@
+import glob
+import os
+import SCons
+import shutil
+import subprocess
+
+Import( 'libPixyEnv' )
+
+usbSourceFiles = os.path.join( libPixyEnv['PIXY_CHECKOUT'], "src", "host", "libpixyusb" )
+objDir = os.path.join( libPixyEnv['LIBPIXY_DIR'], 'obj' )
+binDir = os.path.join( libPixyEnv['LIBPIXY_DIR'], 'bin' )
+
+with open( os.path.join( usbSourceFiles, "cmake", "VERSION" ) ) as versionFile:
+    version = versionFile.readline().strip()
+
+defines = ['__LINUX__', '__LIBPIXY_VERSION__=' + '"\\"' + version + '"\\"']
+compileFlags = ["-Wall", "-Wextra", "-std=c++17", "-Wno-unused-parameter"]
+includePaths = [
+    os.path.join( libPixyEnv['PIXY_CHECKOUT'], "src", "common", "inc" ),
+    os.path.join( usbSourceFiles, "include" ),
+    os.path.join( usbSourceFiles, "src" ),
+    os.path.join( usbSourceFiles, "src", "utils" ),
+    "/usr/include/libusb-1.0",
+    "/usr/include/x86_64-linux-gnu"
+]
+
+
+sourceFiles = glob.glob( os.path.join( usbSourceFiles, "src", "*.cpp") )
+sourceFiles += glob.glob( os.path.join( usbSourceFiles, "src", "utils", "*.cpp") )
+sourceFiles += [os.path.join( libPixyEnv['PIXY_CHECKOUT'], "src", "common", "src", "chirp.cpp" )]
+
+buildEnv = libPixyEnv.Clone(
+    tools=["default", "gcc", "g++"],
+    CPPDEFINES=defines,
+    CPPPATH = includePaths,
+    CXXFLAGS = compileFlags,
+    BINDIR = binDir,
+    OBJPREFIX = objDir + "/",
+)
+
+libTarget = buildEnv.StaticLibrary(
+    target = os.path.join( binDir, "libpixyusb.a" ),
+    source = sourceFiles
+)
+
+Return( 'libTarget' )

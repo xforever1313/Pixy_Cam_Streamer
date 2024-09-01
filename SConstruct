@@ -57,13 +57,19 @@ baseEnv = Environment(
     SOFTWARE_VERSION = version
 )
 
+libPixyEnv = baseEnv.Clone(
+    LIBPIXY_DIR=os.path.join( baseDir, "libpixy" ),
+    PIXY_CHECKOUT=os.path.join( baseDir, "libpixy", "pixy" )
+)
+
 buildEnv = baseEnv.Clone(
-    tools= ["default", "gcc", "g++"],
+    tools=["default", "gcc", "g++"],
     CPPDEFINES=defines,
     CPPPATH = includePaths,
     CXXFLAGS = compileFlags,
     LIBS = libs,
-    BINDIR = os.path.join( baseDir, "bin" )
+    BINDIR = os.path.join( baseDir, "bin" ),
+    LIBPATH = os.path.join( libPixyEnv["LIBPIXY_DIR"], "bin" )
 )
 
 installEnv = baseEnv.Clone(
@@ -97,7 +103,13 @@ Clean( fakeTarget, [os.path.join(fakeEnv['BINDIR']), os.path.join(fakeEnv['OBJPR
 debianEnv = installEnv.Clone(
     EXE_TARGET = exeTarget
 )
+
 SConscript( [os.path.join( debDir, "SConscript" ) ], exports='debianEnv' )
+libTarget = SConscript( [os.path.join( libPixyEnv["LIBPIXY_DIR"], "SConscript" ) ], exports='libPixyEnv' )
+
+Alias( "build_lib_pixy", libTarget )
+Depends( exeTarget, libTarget )
+Depends( fakeTarget, libTarget )
 
 Alias( "build", exeTarget )
 Alias( "build_fake", fakeTarget )
