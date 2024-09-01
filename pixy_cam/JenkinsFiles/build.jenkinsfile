@@ -1,5 +1,63 @@
 @Library( "X13JenkinsLib" )_
 
+void DoDockerBuild()
+{
+    stage( 'clean' )
+    {
+        steps
+        {
+            cleanWs();
+        }
+    }
+    stage( 'checkout' )
+    {
+        steps
+        {
+            checkout scm;
+        }
+    }
+    stage( 'In Docker' )
+    {
+        agent
+        {
+            dockerfile
+            {
+                filename 'ubuntu_build_env.dockerfile'
+                dir 'checkout/pixy_cam/Docker'
+                label 'PixyCamBuildEnv'
+                args "-e HOME='${env.WORKSPACE}'"
+                reuseNode true
+            }
+        }
+        stages
+        {
+            stage( 'build deb' )
+            {
+                steps
+                {
+                    sh 'cd ./checkout/pixy_cam && scons debian_build';
+                }
+            }
+        }
+    }
+    stage( 'Archive Artifacts' )
+    {
+        steps
+        {
+            archiveArtifacts 'pixy_cam/install/deb/bin/*.deb';
+        }
+    }
+}
+
+void CleanupDockerImage()
+{
+    def imageId = sh(script: "docker images -q PixyCamBuildEnv", returnStdout: true).trim();
+    if( imageId )
+    {
+        sh "docker rmi -f ${imageId}";
+    }
+}
+
 pipeline
 {
     agent none
@@ -21,49 +79,15 @@ pipeline
                     }
                     stages
                     {
-                        stage( 'clean' )
+                        DoDockerBuild()
+                    }
+                    post
+                    {
+                        always
                         {
-                            steps
+                            script
                             {
-                                cleanWs();
-                            }
-                        }
-                        stage( 'checkout' )
-                        {
-                            steps
-                            {
-                                checkout scm;
-                            }
-                        }
-                        stage( 'In Docker' )
-                        {
-                            agent
-                            {
-                                dockerfile
-                                {
-                                    filename 'ubuntu_build_env.dockerfile'
-                                    dir 'checkout/pixy_cam/Docker'
-                                    label 'pixy-cam-build-env'
-                                    args "-e HOME='${env.WORKSPACE}'"
-                                    reuseNode true
-                                }
-                            }
-                            stages
-                            {
-                                stage( 'build deb' )
-                                {
-                                    steps
-                                    {
-                                        sh 'cd ./checkout/pixy_cam && scons debian_build';
-                                    }
-                                }
-                            }
-                        }
-                        stage( 'Archive Artifacts' )
-                        {
-                            steps
-                            {
-                                archiveArtifacts 'pixy_cam/install/deb/bin/*.deb';
+                                CleanupDockerImage();
                             }
                         }
                     }
@@ -77,49 +101,15 @@ pipeline
                     }
                     stages
                     {
-                        stage( 'clean' )
+                        DoDockerBuild();
+                    }
+                    post
+                    {
+                        always
                         {
-                            steps
+                            script
                             {
-                                cleanWs();
-                            }
-                        }
-                        stage( 'checkout' )
-                        {
-                            steps
-                            {
-                                checkout scm;
-                            }
-                        }
-                        stage( 'In Docker' )
-                        {
-                            agent
-                            {
-                                dockerfile
-                                {
-                                    filename 'ubuntu_build_env.dockerfile'
-                                    dir 'checkout/pixy_cam/Docker'
-                                    label 'pixy-cam-build-env'
-                                    args "-e HOME='${env.WORKSPACE}'"
-                                    reuseNode true
-                                }
-                            }
-                            stages
-                            {
-                                stage( 'build deb' )
-                                {
-                                    steps
-                                    {
-                                        sh 'cd ./checkout/pixy_cam && scons debian_build';
-                                    }
-                                }
-                            }
-                        }
-                        stage( 'Archive Artifacts' )
-                        {
-                            steps
-                            {
-                                archiveArtifacts 'pixy_cam/install/deb/bin/*.deb';
+                                CleanupDockerImage();
                             }
                         }
                     }
