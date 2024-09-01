@@ -84,10 +84,7 @@ pipeline
                     {
                         stage( "Common Docker Build" )
                         {
-                            steps
-                            {
-                                DoDockerBuild();
-                            }
+                            DoDockerBuild();
                         }
                     }
                     post
@@ -112,10 +109,7 @@ pipeline
                     {
                         stage( "Common Docker Build" )
                         {
-                            steps
-                            {
-                                DoDockerBuild();
-                            }
+                            DoDockerBuild();
                         }
                     }
                     post
