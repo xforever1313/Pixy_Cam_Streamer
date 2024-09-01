@@ -4,6 +4,8 @@ import SCons
 import os
 
 baseDir = os.path.abspath( "." )
+installDir = os.path.join( baseDir, "install" )
+debDir = os.path.join( installDir, "deb" )
 
 version = "1.0.0"
 
@@ -26,7 +28,14 @@ sourceFiles = glob.glob( os.path.join( "src", "*.cpp" ) )
 exe = os.path.join( baseDir, "bin", "pixy_cam" )
 fakeExe = os.path.join( baseDir, "bin", "fake_pixy_cam" )
 
-env = Environment(
+baseEnv = Environment(
+    BASE_DIR = baseDir,
+    INSTALL_DIR = installDir,
+    DEBIAN_INSTALL_DIR = debDir,
+    SOFTWARE_VERSION = version
+)
+
+buildEnv = baseEnv.Clone(
     tools= ["default", "gcc", "g++"],
     CPPDEFINES=defines,
     CPPPATH = includePaths,
@@ -35,14 +44,21 @@ env = Environment(
     BINDIR = os.path.join( baseDir, "bin" )
 )
 
-realEnv = env.Clone(
+installEnv = baseEnv.Clone(
+    PACKAGE_NAME = "pixy_cam_streamer",
+    MAINTAINER = "Seth Hendrick",
+    DESCRIPTION = "Steams output from a Pixy Camera to a RTMP URL",
+    HOMEPAGE = "https://shendrick.net"
+)
+
+realEnv = buildEnv.Clone(
     OBJPREFIX = os.path.join( baseDir, "obj", "real" ) + "/",
 )
 realEnv.Append( 
     CXXFLAGS=["-O2"]
 )
 
-fakeEnv = env.Clone(
+fakeEnv = buildEnv.Clone(
     OBJPREFIX = os.path.join( baseDir, "obj", "fake" ) + "/",
 )
 fakeEnv.Append(
@@ -55,6 +71,11 @@ Clean( exeTarget, [os.path.join(realEnv['BINDIR']), os.path.join(realEnv['OBJPRE
 
 fakeTarget = fakeEnv.Program( target=fakeExe, source=sourceFiles )
 Clean( fakeTarget, [os.path.join(fakeEnv['BINDIR']), os.path.join(fakeEnv['OBJPREFIX'])])
+
+debianEnv = installEnv.Clone(
+    EXE_TARGET = exeTarget
+)
+SConscript( [os.path.join( debDir, "SConscript" ) ], exports='debianEnv' )
 
 Alias( "build", exeTarget )
 Alias( "build_fake", fakeTarget )

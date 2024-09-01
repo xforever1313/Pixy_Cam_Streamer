@@ -1,0 +1,99 @@
+import platform
+import os
+import SCons
+import shutil
+
+Import( 'debianEnv' )
+
+binDir = os.path.join( debianEnv['DEBIAN_INSTALL_DIR'], "bin" )
+objDir = os.path.join( debianEnv['DEBIAN_INSTALL_DIR'], "obj" )
+
+def GetDebianArchitecture():
+    machine = platform.machine()
+    
+    # Mapping of common machine types to Debian architectures
+    arch_map = {
+        'x86_64': 'amd64',
+        'i386': 'i386',
+        'i686': 'i386',
+        'aarch64': 'arm64',
+        'armv7l': 'armhf',
+        'armv6l': 'armel',
+        'ppc64le': 'ppc64el',
+        'mips': 'mips',
+        'mips64': 'mips64el',
+    }
+    
+    return arch_map.get( machine, machine )
+
+def GetControlFileContents( env ):
+    return "Package: " + env["PACKAGE_NAME"] + "\n" + \
+           "Version: " + env["SOFTWARE_VERSION"] + "\n" + \
+           "Maintainer:" + env["MAINTAINER"] + "\n" + \
+           "Architecture: " + GetDebianArchitecture() + "\n" + \
+           "Description: " + env["DESCRIPTION"] + "\n" + \
+           "Homepage: " + env["HOMEPAGE"] + "\n" + \
+           "Built-Using: gcc scons"
+
+def DebianBuild( target, source, env ):
+    print( "Removing old directories..." )
+    if os.path.exists( str( target[0] ) ):
+        os.remove( str( target[0]) )
+
+    if( os.path.exists( os.path.dirname( str( target[0] ) ) ) == False ):
+        os.mkdir( os.path.dirname( str( target[0] ) ) )
+
+    if( os.path.exists( objDir ) ):
+        shutil.rmtree( objDir )
+
+    # Directory Structure:
+    # obj
+    # L chaskis
+    #       L DEBIAN (must be 755)
+    #            L control (control file)
+    #       L usr
+    #          L bin
+    #             L pixy_cam_streamer (binary)
+    #          L lib
+    #             L systemd
+    #                   L user
+    #                       L pixy_cam.services
+    workDir = os.path.join( objDir, "pixy_cam_streamer" )
+    debianFolder = os.path.join( workDir, "DEBIAN" )
+    binFolder = os.path.join( workDir, "usr", "bin" )
+    systemdFolder = os.path.join( workDir, "lib", "systemd", "system" )
+
+    print( "Creating new directories..." )
+    os.makedirs( workDir, exist_ok=True )
+    os.mkdir( debianFolder, 0o755 )
+    os.makedirs( binFolder, exist_ok=True )
+    os.makedirs( systemdFolder, exist_ok=True )
+
+    print( "Writing Control File..." )
+    controlFileLocation = os.path.join( debianFolder, "control" )
+    with open( controlFileLocation, "w" ) as controlFile:
+        controlFile.write( GetControlFileContents( env ) )
+
+    print( "Copying files...")
+    binaryOutputLocation = os.path.join( binFolder, "pixy_cam_streamer" )
+    shutil.copy(
+        str( source[0] ),
+        binaryOutputLocation
+    )
+
+def CleanDirectory():
+    if( os.path.exists( objDir ) ):
+        shutil.rmtree( objDir )
+
+debEnv = debianEnv.Clone(
+    BUILDERS = { "DebianBuild" : Builder( action=DebianBuild ) }
+)
+
+debianTarget = debEnv.DebianBuild(
+    target=[os.path.join( binDir, "derp.deb")],
+    source=[debianEnv['EXE_TARGET']]
+)
+
+Clean( debianTarget, objDir )
+Clean( debianTarget, binDir )
+Alias( "debian_build", debianTarget )
