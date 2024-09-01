@@ -2,6 +2,7 @@ import platform
 import os
 import SCons
 import shutil
+import subprocess
 
 Import( 'debianEnv' )
 
@@ -33,7 +34,8 @@ def GetControlFileContents( env ):
            "Architecture: " + GetDebianArchitecture() + "\n" + \
            "Description: " + env["DESCRIPTION"] + "\n" + \
            "Homepage: " + env["HOMEPAGE"] + "\n" + \
-           "Built-Using: gcc scons"
+           "Built-Using: gcc, scons, libboost-dev, libusb-1.0-0-dev, libpoco-dev\n" + \
+           "Depends: libboost-dev, libusb-1.0-0-dev, libpoco-dev, ffmpeg\n"
 
 def DebianBuild( target, source, env ):
     print( "Removing old directories..." )
@@ -61,7 +63,7 @@ def DebianBuild( target, source, env ):
     workDir = os.path.join( objDir, "pixy_cam_streamer" )
     debianFolder = os.path.join( workDir, "DEBIAN" )
     binFolder = os.path.join( workDir, "usr", "bin" )
-    systemdFolder = os.path.join( workDir, "lib", "systemd", "system" )
+    systemdFolder = os.path.join( workDir, "usr", "lib", "systemd", "system" )
 
     print( "Creating new directories..." )
     os.makedirs( workDir, exist_ok=True )
@@ -80,6 +82,23 @@ def DebianBuild( target, source, env ):
         str( source[0] ),
         binaryOutputLocation
     )
+
+    shutil.copy(
+        os.path.join( env['DEBIAN_INSTALL_DIR'], "..", "systemd", "pixy_cam_streamer.service" ),
+        systemdFolder
+    )
+
+    packageName = env['PACKAGE_NAME'] + "_" + env['SOFTWARE_VERSION'] + "-0_" + GetDebianArchitecture() + ".deb"
+
+    print( "Creating Package" )
+    result = subprocess.run(
+        ["dpkg-deb", "--root-owner-group", "--build", ".", os.path.join( binDir, packageName )],
+        cwd=workDir,
+        check=True
+    )
+    if( result.returncode != 0 ):
+        raise Exception( "Failed to create package, return code: " + result.returncode )
+
 
 def CleanDirectory():
     if( os.path.exists( objDir ) ):

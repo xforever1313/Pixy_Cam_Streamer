@@ -1,0 +1,14 @@
+[Unit]
+Description=pixy_cam_streamer
+After=network.target
+
+[Service]
+Type=forking
+WorkingDirectory=/usr/bin/
+ExecStart=/usr/bin/pixy_cam_streamer
+TimeoutStopSecs=5
+Restart=always
+
+[Install]
+Alias=pixy_cam_streamer.service
+WantedBy=default.target

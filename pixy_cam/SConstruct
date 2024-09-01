@@ -3,6 +3,10 @@ import SCons.Defaults
 import SCons
 import os
 
+from multiprocessing import cpu_count
+
+SetOption('num_jobs', cpu_count())
+
 baseDir = os.path.abspath( "." )
 installDir = os.path.join( baseDir, "install" )
 debDir = os.path.join( installDir, "deb" )
@@ -45,7 +49,7 @@ buildEnv = baseEnv.Clone(
 )
 
 installEnv = baseEnv.Clone(
-    PACKAGE_NAME = "pixy_cam_streamer",
+    PACKAGE_NAME = "pixy-cam-streamer",
     MAINTAINER = "Seth Hendrick",
     DESCRIPTION = "Steams output from a Pixy Camera to a RTMP URL",
     HOMEPAGE = "https://shendrick.net"
