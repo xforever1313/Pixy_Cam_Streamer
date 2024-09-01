@@ -29,20 +29,14 @@ void DoDockerBuild()
                     reuseNode true
                 }
             }
-            stages
+            script
             {
-                stage( 'build deb' )
-                {
-                    steps
-                    {
-                        sh 'cd ./checkout/pixy_cam && scons debian_build';
-                    }
-                }
+                sh 'cd ./checkout/pixy_cam && scons debian_build';
             }
         }
         stage( 'Archive Artifacts' )
         {
-            steps
+            script
             {
                 archiveArtifacts 'pixy_cam/install/deb/bin/*.deb';
             }
