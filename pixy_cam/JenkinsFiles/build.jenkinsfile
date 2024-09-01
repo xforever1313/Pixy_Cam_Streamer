@@ -42,7 +42,7 @@ pipeline
                                 dockerfile
                                 {
                                     filename 'ubuntu_build_env.dockerfile'
-                                    dir 'Docker'
+                                    dir 'checkout/pixy_cam/Docker'
                                     label 'pixy-cam-build-env'
                                     args "-e HOME='${env.WORKSPACE}'"
                                     reuseNode true
@@ -98,7 +98,7 @@ pipeline
                                 dockerfile
                                 {
                                     filename 'ubuntu_build_env.dockerfile'
-                                    dir 'docker'
+                                    dir 'checkout/pixy_cam/Docker'
                                     label 'pixy-cam-build-env'
                                     args "-e HOME='${env.WORKSPACE}'"
                                     reuseNode true
