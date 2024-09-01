@@ -79,7 +79,10 @@ pipeline
                     }
                     stages
                     {
-                        DoDockerBuild()
+                        script
+                        {
+                            DoDockerBuild();
+                        }
                     }
                     post
                     {
@@ -101,7 +104,10 @@ pipeline
                     }
                     stages
                     {
-                        DoDockerBuild();
+                        script
+                        {
+                            DoDockerBuild();
+                        }
                     }
                     post
                     {
