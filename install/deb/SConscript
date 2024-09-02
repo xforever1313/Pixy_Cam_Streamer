@@ -34,8 +34,8 @@ def GetControlFileContents( env ):
            "Architecture: " + GetDebianArchitecture() + "\n" + \
            "Description: " + env["DESCRIPTION"] + "\n" + \
            "Homepage: " + env["HOMEPAGE"] + "\n" + \
-           "Built-Using: g++, scons, libboost-all-dev, libusb-1.0-0-dev, libpoco-dev\n" + \
-           "Depends: libboost-all-dev, libusb-1.0-0-dev, libpoco-dev, ffmpeg\n"
+           "Built-Using: g++, scons, libboost-all-dev, libusb-1.0-0-dev, libpoco-dev, libconfig++-dev\n" + \
+           "Depends: libboost-all-dev, libusb-1.0-0-dev, libpoco-dev, libconfig++-dev, ffmpeg\n"
 
 def DebianBuild( target, source, env ):
     print( "Removing old directories..." )

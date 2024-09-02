@@ -27,13 +27,13 @@
 #include "FfmpegProcessRunner.h"
 #include "FfmpegException.h"
 #include "PixyCameraException.h"
+#include "PixyCamStreamConfig.h"
 
 namespace pixy_cam
 {
-    FfmpegProcessRunner::FfmpegProcessRunner( PixyCamera& camera, const std::string& url ) :
-        fps( 10 ),
+    FfmpegProcessRunner::FfmpegProcessRunner( PixyCamera& camera, const PixyCamStreamConfig& config ) :
         camera( camera ),
-        url( url ),
+        config( config ),
         startStopLock(),
 
         ffmpegProcessId( -1 ),
@@ -137,7 +137,7 @@ namespace pixy_cam
             std::string sizeArg = std::to_string( this->camera.GetWidth() ) + "x" + std::to_string( this->camera.GetHeight() );
 
             execl(
-                "/usr/bin/ffmpeg",
+                this->config.Stream_FfmpegPath().c_str(),
                 "-hide_banner",
                 "-loglevel",
                 "info",
@@ -164,7 +164,7 @@ namespace pixy_cam
                 "-video_size",
                 sizeArg.c_str(),
                 "-framerate",
-                std::to_string( this->fps ).c_str(),
+                std::to_string( this->config.Stream_Fps() ).c_str(),
                 "-i",
                 "pipe:",  // <- From stdin.
 
@@ -197,7 +197,7 @@ namespace pixy_cam
                 // Output to the stream.
                 "-f",
                 "flv",
-                this->url.c_str(),
+                this->config.Stream_RtmpServer().c_str(),
                 nullptr
             );
             exit( 0 );
@@ -320,7 +320,7 @@ namespace pixy_cam
                     throw FfmpegException( "Could not write bytes to ffmpeg" );
                 }
 
-                float timeForFps = 1.0f / this->fps * 1000.0;
+                float timeForFps = 1.0f / this->config.Stream_Fps() * 1000.0;
                 timeForFps -=20; // Need to go slightly faster than the FPS so Ffmpeg doesn't break.
 
                 std::this_thread::sleep_for( std::chrono::milliseconds( static_cast<int64_t>( timeForFps ) ) );

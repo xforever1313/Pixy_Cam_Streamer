@@ -23,13 +23,14 @@
 #include <thread>
 
 #include "PixyCamera.h"
+#include "PixyCamStreamConfig.h"
 
 namespace pixy_cam
 {
     class FfmpegProcessRunner
     {
         public:
-            FfmpegProcessRunner( PixyCamera& camera, const std::string& url );
+            FfmpegProcessRunner( PixyCamera& camera, const PixyCamStreamConfig& config );
             ~FfmpegProcessRunner();
 
             void Init();
@@ -47,10 +48,8 @@ namespace pixy_cam
             void ReadLoop( int file, std::ostream& outFile );
             void SetStatus( const std::string& str );
 
-            const uint8_t fps;
-
             PixyCamera& camera;
-            const std::string& url;
+            const PixyCamStreamConfig& config;
             mutable std::mutex startStopLock;
 
             pid_t ffmpegProcessId;

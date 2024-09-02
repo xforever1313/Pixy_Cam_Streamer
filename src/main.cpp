@@ -32,6 +32,7 @@
 #include "FfmpegProcessRunner.h"
 #include "HttpRequestFactory.h"
 #include "PixyCamera.h"
+#include "PixyCamStreamConfig.h"
 #include "PixyCameraException.h"
 
 std::condition_variable terminateEvent;
@@ -44,7 +45,8 @@ void handle_signal( int )
 
 void PrintUsage( const std::string& exeName )
 {
-    std::cout << "Start Server: " << exeName << " <rtp url> [port]" << std::endl;
+    std::cout << "Start Server: " << exeName << " [config_file_path]" << std::endl;
+    std::cout << "\tconfig_file_path is defaulted to /etc/pixy_cam_streamer/pixy_cam_streamer.cfg" << std::endl;
     std::cout << "Print Help: " << exeName << " --help" << std::endl;
     std::cout << "Print Version: " << exeName << " --version" << std::endl;
 }
@@ -57,8 +59,7 @@ void PrintVersion()
 
 int main( int argc, char* argv[] )
 {
-
-    std::string url;
+    std::string configFile = "/etc/pixy_cam_streamer/pixy_cam_streamer.cfg";
 
     if( argc <= 1 )
     {
@@ -80,7 +81,7 @@ int main( int argc, char* argv[] )
         }
         else
         {
-            url = argv[1];
+            configFile = argv[1];
         }
     }
 
@@ -90,22 +91,22 @@ int main( int argc, char* argv[] )
 
     const uint16_t desiredWidth = 320;
     const uint16_t desiredHeight = 200;
-    uint16_t port = 10013;
-    if( argc >= 3 )
-    {
-        unsigned long value = std::stoul( argv[2] );
-        if( value > std::numeric_limits<uint16_t>::max() )
-        {
-            std::cout << "Passed in port is too big.  Must be less than " << std::numeric_limits<uint16_t>::max() << std::endl;
-        }
-        port = static_cast<uint16_t>( value );
-    }
 
     try
     {
+        pixy_cam::PixyCamStreamConfig config( configFile );
         PrintVersion();
-        std::cout << "Passed in RTP Server: " << url << std::endl;
-        std::cout << "Passed in HTTP port: " << port << std::endl;
+
+        std::cout << "Controller HTTP port: " << config.Web_ListenPort() << std::endl;
+        std::cout << std::endl;
+        std::cout << "Enable auto white balance: " << config.Camera_AutoWhiteBalance() << std::endl;
+        std::cout << "Enable auto exposure compensation: " << config.Camera_AutoExposureCompensation() << std::endl;
+        std::cout << "Default Camera Brightness: " << std::to_string( config.Camera_Brightness() ) << std::endl;
+        std::cout << std::endl;
+        std::cout << "FPS: " << std::to_string( config.Stream_Fps() ) << std::endl;
+        std::cout << "FFMPEG Exe Location: " << config.Stream_FfmpegPath() << std::endl;
+        std::cout << "RTMP Server: " << config.Stream_RtmpServer() << std::endl;
+        std::cout << std::endl;
 
         pixy_cam::PixyCamera camera( desiredWidth, desiredHeight );
         camera.Init();
@@ -124,18 +125,20 @@ int main( int argc, char* argv[] )
         camera.SetAutoWhiteBalance( true );
         camera.SetAutoExposureCompensation( true );
 
-        pixy_cam::FfmpegProcessRunner ffmpeg( camera, url );
+        pixy_cam::FfmpegProcessRunner ffmpeg( camera, config );
         ffmpeg.Init();
 
         // Poco is apparently smart enough to delete this automatically.
         Poco::Net::HTTPServerParams* serverParams = new Poco::Net::HTTPServerParams();
         serverParams->setMaxQueued( 100 );
         serverParams->setMaxThreads( 1 );
-        Poco::Net::ServerSocket socket( port );
+        Poco::Net::ServerSocket socket( config.Web_ListenPort() );
         Poco::Net::HTTPServer server( new pixy_cam::HttpRequestFactory( ffmpeg, camera ), socket, serverParams );
 
         server.start();
+        #ifndef FAKE_CAMERA
         ffmpeg.StartLoop();
+        #endif
 
         std::mutex m;
         std::unique_lock<std::mutex> lock( m );
@@ -150,6 +153,12 @@ int main( int argc, char* argv[] )
     {
         std::cout << e.what() << std::endl;
         return e.GetErrorCode();
+    }
+    catch( const libconfig::ConfigException &e )
+    {
+        std::cout << "Configuration error:" << std::endl;
+        std::cout << e.what() << std::endl;
+        return 25;
     }
     catch( const pixy_cam::FfmpegException& e )
     {

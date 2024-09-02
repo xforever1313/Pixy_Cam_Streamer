@@ -44,6 +44,7 @@ includePaths = [
 ]
 libs = [
     "pixyusb",
+    "config++",
     "boost_thread",
     "boost_chrono",
     "boost_system",

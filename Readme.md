@@ -11,6 +11,7 @@ To build the code yourself, you need to install the following packages on a Linu
 * libboost-all-dev
 * libusb-1.0-0-dev
 * libpoco-dev
+* libconfig++-dev
 
 Remember to update and initialize all submodules (there's one located in ```libpixy/pixy```).
 
