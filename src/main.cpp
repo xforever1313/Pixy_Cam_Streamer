@@ -121,9 +121,10 @@ int main( int argc, char* argv[] )
             std::cout << "STOP returned " << ex.what() << " w/response " << stopResponse << std::endl;
         }
 
-        // Default these to true.
-        camera.SetAutoWhiteBalance( true );
-        camera.SetAutoExposureCompensation( true );
+        // Set initial camera settings.
+        camera.SetAutoWhiteBalance( config.Camera_AutoWhiteBalance() );
+        camera.SetAutoExposureCompensation( config.Camera_AutoExposureCompensation() );
+        camera.SetBrightness( config.Camera_Brightness() );
 
         pixy_cam::FfmpegProcessRunner ffmpeg( camera, config );
         ffmpeg.Init();
