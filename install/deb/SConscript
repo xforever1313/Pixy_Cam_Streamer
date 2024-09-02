@@ -50,9 +50,12 @@ def DebianBuild( target, source, env ):
 
     # Directory Structure:
     # obj
-    # L chaskis
+    # L pixy_cam_streamer
     #       L DEBIAN (must be 755)
     #            L control (control file)
+    #       L etc
+    #          L pixy_cam_streamer
+    #                    L pixy_cam_streamer.cfg
     #       L usr
     #          L bin
     #             L pixy_cam_streamer (binary)
@@ -62,12 +65,14 @@ def DebianBuild( target, source, env ):
     #                       L pixy_cam.services
     workDir = os.path.join( objDir, "pixy_cam_streamer" )
     debianFolder = os.path.join( workDir, "DEBIAN" )
+    etcFolder = os.path.join( workDir, "etc", "pixy_cam_streamer" )
     binFolder = os.path.join( workDir, "usr", "bin" )
     systemdFolder = os.path.join( workDir, "usr", "lib", "systemd", "system" )
 
     print( "Creating new directories..." )
     os.makedirs( workDir, exist_ok=True )
     os.mkdir( debianFolder, 0o755 )
+    os.makedirs( etcFolder, exist_ok=True )
     os.makedirs( binFolder, exist_ok=True )
     os.makedirs( systemdFolder, exist_ok=True )
 
@@ -81,6 +86,11 @@ def DebianBuild( target, source, env ):
     shutil.copy(
         str( source[0] ),
         binaryOutputLocation
+    )
+
+    shutil.copy(
+        str( source[1] ),
+        os.path.join( etcFolder, "pixy_cam_streamer.cfg" )
     )
 
     shutil.copy(
@@ -110,7 +120,10 @@ debEnv = debianEnv.Clone(
 
 debianTarget = debEnv.DebianBuild(
     target=[os.path.join( binDir, "derp.deb")],
-    source=[debianEnv['EXE_TARGET']]
+    source=[
+        debianEnv['EXE_TARGET'],
+        os.path.join( debianEnv['BASE_DIR'], "pixy_cam_streamer.cfg" )
+    ]
 )
 
 Clean( debianTarget, objDir )
