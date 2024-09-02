@@ -73,7 +73,7 @@ pipeline
                         {
                             steps
                             {
-                                archiveArtifacts 'install/deb/bin/*.deb';
+                                archiveArtifacts 'checkout/install/deb/bin/*.deb';
                             }
                         }
                     }
@@ -140,7 +140,7 @@ pipeline
                         {
                             steps
                             {
-                                archiveArtifacts 'install/deb/bin/*.deb';
+                                archiveArtifacts 'checkout/install/deb/bin/*.deb';
                             }
                         }
                     }
