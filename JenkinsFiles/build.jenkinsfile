@@ -155,6 +155,47 @@ pipeline
                         }
                     }
                 }
+
+                stage( "Linux armv6l" )
+                {
+                    // Docker doesn't exist for this architecture,
+                    // Computer needs all dependencies installed.
+                    agent
+                    {
+                        label "linux && armv6l";
+                    }
+                    stages
+                    {
+                        stage( 'clean' )
+                        {
+                            steps
+                            {
+                                cleanWs();
+                            }
+                        }
+                        stage( 'checkout' )
+                        {
+                            steps
+                            {
+                                checkout scm;
+                            }
+                        }
+                        stage( "Build" )
+                        {
+                            steps
+                            {
+                                sh 'cd ./checkout && scons debian_build';
+                            }
+                        }
+                        stage( 'Archive Artifacts' )
+                        {
+                            steps
+                            {
+                                archiveArtifacts 'checkout/install/deb/bin/*.deb';
+                            }
+                        }
+                    }
+                }
             }
         }
     }
