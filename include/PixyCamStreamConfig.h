@@ -1,6 +1,7 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+#include <cstdint>
 #include <libconfig.h++>
 #include <string>
 
