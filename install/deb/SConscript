@@ -10,22 +10,14 @@ binDir = os.path.join( debianEnv['DEBIAN_INSTALL_DIR'], "bin" )
 objDir = os.path.join( debianEnv['DEBIAN_INSTALL_DIR'], "obj" )
 
 def GetDebianArchitecture():
-    machine = platform.machine()
-    
-    # Mapping of common machine types to Debian architectures
-    arch_map = {
-        'x86_64': 'amd64',
-        'i386': 'i386',
-        'i686': 'i386',
-        'aarch64': 'arm64',
-        'armv7l': 'armhf',
-        'armv6l': 'armel',
-        'ppc64le': 'ppc64el',
-        'mips': 'mips',
-        'mips64': 'mips64el',
-    }
-    
-    return arch_map.get( machine, machine )
+
+    result = subprocess.run(
+        ['dpkg-architecture', '--query', 'DEB_BUILD_ARCH'],
+        capture_output = True, # Python >= 3.7 only
+        text = True # Python >= 3.7 only
+    )
+
+    return result.stdout.strip()
 
 def GetControlFileContents( env ):
     return "Package: " + env["PACKAGE_NAME"] + "\n" + \
