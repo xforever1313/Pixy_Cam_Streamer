@@ -31,7 +31,7 @@ debDir = os.path.join( installDir, "deb" )
 libPixyFolder = os.path.join( baseDir, "libpixy" )
 pixyCheckout = os.path.join( libPixyFolder, "pixy" )
 
-version = "1.0.0"
+version = "1.0.1"
 
 defines = ["VERSION=" + '"\\"' + version + '\\""']
 compileFlags = ["-Wall", "-Wextra", "-std=c++17", "-Wno-unused-parameter"]
