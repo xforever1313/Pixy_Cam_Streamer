@@ -61,13 +61,7 @@ int main( int argc, char* argv[] )
 {
     std::string configFile = "/etc/pixy_cam_streamer/pixy_cam_streamer.cfg";
 
-    if( argc <= 1 )
-    {
-        std::cout << "Invalid Arguments.  See below for usage." << std::endl;
-        PrintUsage( argv[0] );
-        return 1;
-    }
-    else if( argc >= 2 )
+    if( argc >= 2 )
     {
         if( std::string( "--help" ) == argv[1] )
         {
@@ -94,6 +88,8 @@ int main( int argc, char* argv[] )
 
     try
     {
+        std::cout << "Using config file located at: " << configFile << std::endl;
+
         pixy_cam::PixyCamStreamConfig config( configFile );
         PrintVersion();
 
